@@ -53,6 +53,7 @@ dependencies {
     }
     implementation "com.android.support:support-fragment:28.0.0-beta01"
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
+    //api 'com.firebaseui:firebase-ui:0.6.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

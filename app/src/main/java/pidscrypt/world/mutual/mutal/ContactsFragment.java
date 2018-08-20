@@ -1,7 +1,6 @@
 package pidscrypt.world.mutual.mutal;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -15,21 +14,17 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import pidscrypt.world.mutual.mutal.Adapters.ContactsViewAdapter;
 import pidscrypt.world.mutual.mutal.api.Contact;
-import pidscrypt.world.mutual.mutal.api.Friend;
 
 
 public class ContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnClickListener {
@@ -92,15 +87,6 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /*contacts_list = new ArrayList<>();
-        // add chats from firebase user list
-        contacts_list.add(new Contact("daniel Ssejj","Foucs",R.drawable.attach_audio));
-        contacts_list.add(new Contact("kalah leah","God is able",R.drawable.attach_gallery));
-        contacts_list.add(new Contact("nixon","Programmer things",R.drawable.attach_contact));
-        contacts_list.add(new Contact("Brendah ICT","If only",R.drawable.attach_video));
-        contacts_list.add(new Contact("nkonwa baits","Say whaaat?",R.drawable.attach_camera));*/
-
-        //getContacts();
     }
 
     @Override
@@ -119,7 +105,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         return layout;
     }
 
-    private List<Contact> getContacts(){
+    public List<Contact> getContacts(){
 
         List<Contact> list = new ArrayList<>();
         List<String> eraser = new ArrayList<>();

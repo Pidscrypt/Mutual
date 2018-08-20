@@ -5,51 +5,145 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/colorTranslucent"
     android:fitsSystemWindows="true"
     tools:context=".ChatActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:background="@drawable/red_bottom"
         android:minHeight="?attr/actionBarSize"
         app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
         app:title="@string/app_name">
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize">
+            <!-- android:background="?attr/selectableItemBackgroundBorderless" will cause this Custom View to make ripple effect -->
 
+            <LinearLayout
+                android:id="@+id/conversation_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/abc_action_bar_up_description"
+                android:orientation="horizontal"
+                tools:ignore="PrivateResource">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/userIV"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/dami" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/conversation_image"
+                android:orientation="vertical"
+                android:paddingBottom="2dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="0dp"
+                android:paddingTop="0dp">
+
+
+                <TextView
+                    android:id="@+id/name_chat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="0.6"
+                    android:ellipsize="end"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:text="daniel"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/lastSeenTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="0.4"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="last seen 1 hour ago"
+                    android:textSize="12sp" />
+
+
+            </LinearLayout>
+        </RelativeLayout>
     </android.support.v7.widget.Toolbar>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/chat_messages"
         android:layout_width="match_parent"
         android:layout_weight="1"
         android:layout_height="0dp"
+        android:paddingTop="5dp"
+        android:clipToPadding="false"
         />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="@dimen/fab_margin"
+        android:padding="8dp"
         android:gravity="center_vertical">
-        <ImageView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:id="@+id/attach_file_btn"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:background="@drawable/rect_oval_draw">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/attach_emoticon_btn"
+                android:layout_gravity="start"
+                android:baselineAlignBottom="true"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:tint="@color/colorGrey"
+                app:srcCompat="@drawable/ic_insert_emoticon_black_24dp"/>
+            <android.support.design.widget.TextInputEditText
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:padding="8dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="12dp"
+                android:id="@+id/text_msg"
+                android:background="@color/colorPrimary"
+                android:hint="@string/message_tet_placeholder"
+                tools:ignore="NestedWeights" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:id="@+id/attach_file_btn"
+                android:layout_gravity="center_vertical"
+                android:baselineAlignBottom="true"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:tint="#000"
+                app:srcCompat="@drawable/ic_action_attach"/>
+            <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/open_cam_btn"
             android:layout_gravity="start"
             android:baselineAlignBottom="true"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
-            android:src="@drawable/ic_action_attach"/>
-        <android.support.design.widget.TextInputEditText
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:padding="8dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:id="@+id/text_msg"
-            android:hint="@string/message_tet_placeholder"
-            android:background="@drawable/rect_oval_draw"/>
+                android:tint="@color/colorGrey"
+            app:srcCompat="@drawable/ic_photo_camera_black_24dp"/>
+        </LinearLayout>
         <ImageView
             android:layout_width="45dp"
             android:layout_height="45dp"
@@ -61,6 +155,6 @@
             android:layout_marginEnd="4dp"
             android:gravity="center"
             android:background="@drawable/ic_send_btn"
-            app:srcCompat="@drawable/ic_send_white_24dp"/>
+            app:srcCompat="@drawable/ic_mic_white_24dp"/>
     </LinearLayout>
 </LinearLayout>

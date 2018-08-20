@@ -1,4 +1,4 @@
-package pidscrypt.world.mutual.mutal;
+package pidscrypt.world.mutual.mutal.Adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -11,8 +11,8 @@ import android.widget.TextView;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import pidscrypt.world.mutual.mutal.R;
 import pidscrypt.world.mutual.mutal.api.Contact;
-import pidscrypt.world.mutual.mutal.api.Friend;
 
 public class ContactsViewAdapter extends RecyclerView.Adapter<ContactsViewAdapter.ContactsViewHolder> {
 

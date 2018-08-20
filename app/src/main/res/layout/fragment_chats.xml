@@ -13,16 +13,14 @@
         android:scrollbars="vertical">
         
     </android.support.v7.widget.RecyclerView>
+
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorPrimaryDark"
-        android:background="@color/colorPrimaryDark"
+        android:background="@drawable/ic_send_btn"
         app:fabSize="normal"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_gravity="bottom|end"
-        app:srcCompat="@drawable/ic_message_white"
-        android:layout_marginRight="16dp" />
-
+        app:srcCompat="@drawable/ic_message_white" />
 </FrameLayout>

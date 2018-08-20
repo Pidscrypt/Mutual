@@ -1,25 +1,28 @@
-package pidscrypt.world.mutual.mutal;
+package pidscrypt.world.mutual.mutal.Adapters;
 
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
-import android.icu.util.Freezable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import pidscrypt.world.mutual.mutal.ChatActivity;
+import pidscrypt.world.mutual.mutal.R;
 import pidscrypt.world.mutual.mutal.api.Friend;
+import pidscrypt.world.mutual.mutal.api.MessageStatus;
+import pidscrypt.world.mutual.mutal.api.MessageType;
 
 public class ChatsViewAdapter extends RecyclerView.Adapter<ChatsViewAdapter.ChatsViewHolder> {
 
@@ -41,9 +44,41 @@ public class ChatsViewAdapter extends RecyclerView.Adapter<ChatsViewAdapter.Chat
 
     @Override
     public void onBindViewHolder(final ChatsViewHolder chatsViewHolder, int i) {
-        chatsViewHolder.friend_name.setText(chat_items.get(i).getName());
-        chatsViewHolder.friend_recent_msg.setText(chat_items.get(i).getLastMsg());
-        chatsViewHolder.friend_img.setImageResource(chat_items.get(i).getPhoto());
+        Friend friend = chat_items.get(i);
+        chatsViewHolder.friend_name.setText(friend.getName());
+        chatsViewHolder.friend_recent_msg.setText(friend.getLastMsg());
+        chatsViewHolder.last_msg_time.setText(friend.getLastSeen());
+        //chatsViewHolder.num_unread_msg.setText(friend.getNumUnReadMsg());
+
+        // place raad status on outgoing messages
+        switch (friend.getLastMsgStatus()){
+            case MessageStatus.MESSAGE_GOT_READ_RECIEPT_FROM_TARGET:
+                chatsViewHolder.message_status.setImageResource(R.drawable.message_got_read_receipt_from_target);
+                break;
+            case MessageStatus.MESSAGE_GOT_READ_RECIEPT_FROM_TARGET_ONMEDIA:
+                chatsViewHolder.message_status.setImageResource(R.drawable.message_got_read_receipt_from_target_onmedia);
+                break;
+            case MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER:
+                chatsViewHolder.message_status.setImageResource(R.drawable.message_got_receipt_from_server);
+                break;
+            case MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER_ONMEDIA:
+                chatsViewHolder.message_status.setImageResource(R.drawable.message_got_receipt_from_server_onmedia);
+                break;
+            case MessageStatus.MESSAGE_GOT_RECIEPT_FROM_TARGET:
+                chatsViewHolder.message_status.setImageResource(R.drawable.message_got_receipt_from_target);
+                break;
+            case MessageStatus.MESSAGE_GOT_RECIEPT_FROM_TARGET_ONMEDIA:
+                chatsViewHolder.message_status.setImageResource(R.drawable.message_got_receipt_from_target_onmedia);
+                break;
+            default:
+                    chatsViewHolder.message_status.setImageResource(R.drawable.message_unsent);
+        }
+
+        if(friend.getProfilePicUrl().equals("")){
+            chatsViewHolder.friend_img.setImageResource(R.drawable.avatar_contact);
+        }else{
+            Glide.with(chatsViewHolder.friend_img.getContext()).load(friend.getProfilePicUrl()).into(chatsViewHolder.friend_img);
+        }
 
         chatsViewHolder.friend_img.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,6 +127,9 @@ public class ChatsViewAdapter extends RecyclerView.Adapter<ChatsViewAdapter.Chat
         TextView friend_name, friend_recent_msg;
         ImageView friend_img;
         LinearLayout chatContainer;
+        TextView last_msg_time;
+        TextView num_unread_msg;
+        ImageView message_status;
 
         public ChatsViewHolder(View itemView) {
             super(itemView);
@@ -99,6 +137,9 @@ public class ChatsViewAdapter extends RecyclerView.Adapter<ChatsViewAdapter.Chat
             friend_recent_msg = (TextView) itemView.findViewById(R.id.friend_last_msg);
             friend_img = (CircleImageView) itemView.findViewById(R.id.friend_img);
             chatContainer = (LinearLayout) itemView.findViewById(R.id.chat_container);
+            last_msg_time = (TextView) itemView.findViewById(R.id.last_msg_time);
+            num_unread_msg = (TextView) itemView.findViewById(R.id.num_unread_msg);
+            message_status = (ImageView) itemView.findViewById(R.id.message_status);
         }
     }
 }

@@ -1,9 +1,8 @@
 package pidscrypt.world.mutual.mutal;
 
-import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,12 +10,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import pidscrypt.world.mutual.mutal.Adapters.ChatsViewAdapter;
 import pidscrypt.world.mutual.mutal.api.Friend;
+import pidscrypt.world.mutual.mutal.api.MessageStatus;
 
 
 public class ChatsFragment extends Fragment {
@@ -50,11 +50,12 @@ public class ChatsFragment extends Fragment {
 
 
         // add chats from firebase user list
-        list.add(new Friend("daniel Ssejj","where are you man?",R.drawable.avatar_contact));
-        list.add(new Friend("kalah leah","Daniel!!",R.drawable.avatar_contact));
-        list.add(new Friend("nixon","I need that php API up tomorrow. BTW the friday meeting is still on",R.drawable.avatar_contact));
-        list.add(new Friend("Brendah ICT","can we talk?",R.drawable.avatar_contact));
-        list.add(new Friend("nkonwa baits","Up in lab",R.drawable.avatar_contact));
+
+        list.add(new Friend("jshgjdsdffzhbs","where are you man?","","+256773891234", MessageStatus.MESSAGE_GOT_READ_RECIEPT_FROM_TARGET));
+        list.add(new Friend("uhbziu47bkbcDS","Daniel!!","","+256705056872",MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER));
+        list.add(new Friend("ajgjbgzjhgjsh","I need that php API up tomorrow. BTW the friday meeting is still on","","+256773891234",MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER));
+        list.add(new Friend("khkzhdkjhfkdsjhk","can we talk?","","+256773891234",MessageStatus.MESSAGE_GOT_RECIEPT_FROM_TARGET));
+        list.add(new Friend("ukdhzjhdzkhkjdz","Up in lab","","+256773891234",MessageStatus.MESSAGE_GOT_READ_RECIEPT_FROM_TARGET));
 
         return list;
     }

@@ -1,6 +1,5 @@
-package pidscrypt.world.mutual.mutal;
+package pidscrypt.world.mutual.mutal.Adapters;
 
-import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +10,7 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
+import pidscrypt.world.mutual.mutal.R;
 import pidscrypt.world.mutual.mutal.api.Album;
 
 public class AlbumRecyclerAdapter extends RecyclerView.Adapter<AlbumRecyclerAdapter.AlbumViewHolder> {

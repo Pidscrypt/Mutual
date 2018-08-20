@@ -1,38 +1,22 @@
 package pidscrypt.world.mutual.mutal;
 
-import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.transition.Transition;
-import android.support.transition.TransitionInflater;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
-import android.transition.Slide;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import pidscrypt.world.mutual.mutal.dummy.DummyContent;
+import pidscrypt.world.mutual.mutal.Adapters.LandingPagerAdapter;
 
 public class LandingActivity extends AppCompatActivity implements ChatsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener, MutualsFragment.OnFragmentInteractionListener, InstaFragment.OnFragmentInteractionListener {
 
@@ -63,23 +47,6 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
         //mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
-
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int i, float v, int i1) {
-
-            }
-
-            @Override
-            public void onPageSelected(int i) {
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int i) {
-
-            }
-        });
 
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseAuthState = new FirebaseAuth.AuthStateListener(){

@@ -1,10 +1,15 @@
-package pidscrypt.world.mutual.mutal;
+package pidscrypt.world.mutual.mutal.Adapters;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+
+import pidscrypt.world.mutual.mutal.ChatsFragment;
+import pidscrypt.world.mutual.mutal.ContactsFragment;
+import pidscrypt.world.mutual.mutal.InstaFragment;
+import pidscrypt.world.mutual.mutal.MutualsFragment;
 
 public class LandingPagerAdapter extends FragmentStatePagerAdapter {
 

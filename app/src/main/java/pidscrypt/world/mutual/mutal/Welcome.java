@@ -113,7 +113,7 @@ public class Welcome extends AppCompatActivity {
         logo = findViewById(R.id.logo);
         logo_container = (LinearLayout) findViewById(R.id.logo_container);
 
-startAnimation();
+        startAnimation();
         mVisible = true;
 
         //createDatabase();
