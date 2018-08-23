@@ -144,17 +144,33 @@
                 android:tint="@color/colorGrey"
             app:srcCompat="@drawable/ic_photo_camera_black_24dp"/>
         </LinearLayout>
-        <ImageView
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:id="@+id/send_message_btn"
-            android:padding="8dp"
-            android:layout_gravity="end"
-            android:baselineAlignBottom="true"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:gravity="center"
-            android:background="@drawable/ic_send_btn"
-            app:srcCompat="@drawable/ic_mic_white_24dp"/>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:id="@+id/send_audio_btn"
+                android:padding="8dp"
+                android:layout_gravity="end"
+                android:baselineAlignBottom="true"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:gravity="center"
+                android:background="@drawable/ic_send_btn"
+                app:srcCompat="@drawable/ic_send_white_24dp"/>
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:id="@+id/send_message_btn"
+                android:padding="8dp"
+                android:layout_gravity="end"
+                android:baselineAlignBottom="true"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:gravity="center"
+                android:background="@drawable/ic_send_btn"
+                app:srcCompat="@drawable/ic_mic_white_24dp"/>
+        </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

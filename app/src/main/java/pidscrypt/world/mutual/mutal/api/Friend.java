@@ -6,8 +6,6 @@ import android.os.Parcelable;
 import android.widget.ImageView;
 
 import com.google.firebase.firestore.IgnoreExtraProperties;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 
 import pidscrypt.world.mutual.mutal.ContactsFragment;
 
@@ -16,28 +14,19 @@ public class Friend {
 
     private int numReadMsg;
     private int lastMsgStatus;
-    @SerializedName("name")
-    @Expose
+
     private String name = "";
-    @SerializedName("profile_pic_url")
-    @Expose
+
     private String profilePicUrl = "";
-    @SerializedName("last_seen")
-    @Expose
+
     private String lastSeen = "";
-    @SerializedName("is_typing")
-    @Expose
+
     private Boolean isTyping = false;
-    @SerializedName("status")
-    @Expose
+
     private String status = "";
 
-    @SerializedName("uid")
-    @Expose
     private String uid = "";
 
-    @SerializedName("lastMsg")
-    @Expose
     private String lastMsg = "";
 
     public int getNumUnReadMsg() {

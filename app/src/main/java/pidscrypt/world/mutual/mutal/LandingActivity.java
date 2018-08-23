@@ -3,6 +3,7 @@ package pidscrypt.world.mutual.mutal;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
@@ -12,10 +13,13 @@ import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import io.fabric.sdk.android.Fabric;
 import pidscrypt.world.mutual.mutal.Adapters.LandingPagerAdapter;
 
 public class LandingActivity extends AppCompatActivity implements ChatsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener, MutualsFragment.OnFragmentInteractionListener, InstaFragment.OnFragmentInteractionListener {
@@ -23,10 +27,12 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
     private LandingPagerAdapter landingPagerAdapter;
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener firebaseAuthState;
+    private FloatingActionButton fab_new_message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_landing);
         setupWindowAnimations();
 
@@ -36,6 +42,7 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
 
         TabLayout mTabLayout = (TabLayout) findViewById(R.id.tabs);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
+        fab_new_message = (FloatingActionButton) findViewById(R.id.fab_new_message);
         mViewPager.setAdapter(landingPagerAdapter);
         mTabLayout.setTabsFromPagerAdapter(landingPagerAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
@@ -62,6 +69,13 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
                 }
             }
         };
+
+        fab_new_message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(LandingActivity.this,SendMessageToActivity.class));
+            }
+        });
 
     }
 

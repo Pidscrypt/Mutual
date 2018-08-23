@@ -25,6 +25,7 @@ import java.util.List;
 
 import pidscrypt.world.mutual.mutal.Adapters.ContactsViewAdapter;
 import pidscrypt.world.mutual.mutal.api.Contact;
+import pidscrypt.world.mutual.mutal.services.Contacts;
 
 
 public class ContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnClickListener {
@@ -33,17 +34,6 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     private RecyclerView contacts_recycler;
     private List<Contact> contacts_list;
 
-    /*
-     * Defines an array that contains column names to move from
-     * the Cursor to the ListView.
-     */
-    @SuppressLint("InlinedApi")
-    private final static String[] FROM_COLUMNS = {
-            Build.VERSION.SDK_INT
-                    >= Build.VERSION_CODES.HONEYCOMB ?
-                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY :
-                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-    };
     /*
      * Defines an array that contains resource ids for the layout views
      * that get the Cursor column contents. The id is pre-defined in
@@ -78,6 +68,8 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     // Defines the array to hold values that replace the ?
     private String[] mSelectionArgs = { mSearchString };
 
+    private Contacts mContacts;
+
     public ContactsFragment(){
 
     }
@@ -96,7 +88,9 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         View layout = inflater.inflate(R.layout.fragment_contacts, container, false);
         contacts_recycler = layout.findViewById(R.id.contacts_recycler_view);
 
-        ContactsViewAdapter contactsViewAdapter = new ContactsViewAdapter(getContacts(),getContext());
+        mContacts = new Contacts(getContext());
+
+        ContactsViewAdapter contactsViewAdapter = new ContactsViewAdapter(mContacts.fetch(),getContext());
         contacts_recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         contacts_recycler.setAdapter(contactsViewAdapter);
 
@@ -104,7 +98,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
 
         return layout;
     }
-
+/*
     public List<Contact> getContacts(){
 
         List<Contact> list = new ArrayList<>();
@@ -139,7 +133,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         return list;
-    }
+    }*/
 
     @Override
     public void onStart() {

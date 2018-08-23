@@ -10,13 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@drawable/mutual_bg_waves"
-        android:paddingHorizontal="30dp">
+        android:padding="30dp"
+        android:background="@drawable/mutual_bg_waves">
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
-            android:padding="12dp"
+            android:padding="20dp"
             android:minHeight="120dp"
             android:background="@color/colorPrimary"
             android:layout_gravity="center">
@@ -31,7 +31,7 @@
                     android:layout_height="80dp"
                     android:layout_gravity="start"
                     android:contentDescription="user image"
-                    android:src="@drawable/attach_gallery" />
+                    android:src="@drawable/avatar_contact" />
                 <EditText
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -42,10 +42,21 @@
                     android:hint="@string/enter_name_placeholder"
                     android:inputType="textPersonName"
                     android:layout_gravity="center_vertical"
-                    android:textColorHint="@color/colorAccent"
-                    android:layout_marginLeft="12dp" />
+                    android:textColorHint="@color/colorAccent" />
 
             </LinearLayout>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:id="@+id/user_tag"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/red_bottom"
+                android:hint="@string/enter_name_placeholder"
+                android:inputType="textPersonName"
+                android:layout_gravity="bottom"
+                android:textColorHint="@color/colorAccent" />
         </android.support.v7.widget.CardView>
         <Button
             android:layout_width="match_parent"
@@ -54,13 +65,7 @@
             android:text="@string/complete_setup"
             android:textColor="@color/colorPrimary"
             android:background="@drawable/btn_mutual"
-
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:id="@+id/test_text"/>
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

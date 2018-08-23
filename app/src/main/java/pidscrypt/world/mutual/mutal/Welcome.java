@@ -35,60 +35,10 @@ import static java.lang.Thread.sleep;
  */
 public class Welcome extends AppCompatActivity {
 
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
-    private View mContentView;
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
-    private View mControlsView;
     private LinearLayout welcome_reveal;
     private ImageView logo;
     private LinearLayout logo_container;
-    private ViewGroup mSceneRoot;
-    private TransitionManager transitionManager;
-    private Button btn_continue,go_home, sign_up_btn;
-
-    private boolean mVisible;
-
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-
-                Snackbar.make(view,"Press continue! have Fun!",Snackbar.LENGTH_SHORT).show();
-            return false;
-        }
-    };
+    private Button btn_continue;
 
     @Override
     public void onAttachedToWindow() {
@@ -114,9 +64,6 @@ public class Welcome extends AppCompatActivity {
         logo_container = (LinearLayout) findViewById(R.id.logo_container);
 
         startAnimation();
-        mVisible = true;
-
-        //createDatabase();
 
         btn_continue.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -125,21 +72,9 @@ public class Welcome extends AppCompatActivity {
                 Intent i = new Intent(Welcome.this,PhoneAuthActivity.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i);
-                //Welcome.this.finish();
+                Welcome.this.finish();
             }
         });
-
-    }
-
-    public void createDatabase(){
-        MutualDB mdb = new MutualDB();
-        mdb.setDatabaseName("testbasemutual");
-
-        try{
-            mdb.CreateTables();
-        }catch (Exception ex){
-
-        }
 
     }
 
@@ -166,26 +101,5 @@ public class Welcome extends AppCompatActivity {
         anim.reset();
         logo_container.clearAnimation();
         logo_container.startAnimation(anim);
-    }
-
-    private void toggle(View view) {
-        if (mVisible) {
-            hide(view);
-        } else {
-            show(view);
-        }
-    }
-
-    private void hide(View view) {
-        mVisible = false;
-        view.setVisibility(View.INVISIBLE);
-        view.animate();
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show(View view) {
-        mVisible = true;
-        view.setVisibility(View.VISIBLE);
-        view.animate();
     }
 }

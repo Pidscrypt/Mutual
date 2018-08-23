@@ -1,22 +1,36 @@
 package pidscrypt.world.mutual.mutal;
 
 import android.animation.TimeInterpolator;
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.PixelFormat;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Slide;
+import android.util.Log;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,10 +39,12 @@ import java.util.List;
 import pidscrypt.world.mutual.mutal.Adapters.ChatItemsViewAdapter;
 import pidscrypt.world.mutual.mutal.Adapters.ChatsViewAdapter;
 import pidscrypt.world.mutual.mutal.api.ChatMessage;
+import pidscrypt.world.mutual.mutal.api.DatabaseNode;
 import pidscrypt.world.mutual.mutal.api.Friend;
 import pidscrypt.world.mutual.mutal.api.ImageMessage;
 import pidscrypt.world.mutual.mutal.api.MessageStatus;
 import pidscrypt.world.mutual.mutal.api.TextMessage;
+import pidscrypt.world.mutual.mutal.media.Audio;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -36,10 +52,15 @@ public class ChatActivity extends AppCompatActivity {
     private TextInputEditText text_msg;
     private static final int ANIM_DURATION = 500;
     private TextView name_chat;
-    private ImageView send_message_btn;
+    private ImageView send_message_btn, send_audio_btn;
     private RecyclerView chat_messages_recycler;
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference messageRefInChat = db.collection(DatabaseNode.MESSAGES);
+    private Animation anim;
+    private Audio mAudioPlayer;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,19 +70,22 @@ public class ChatActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        setupWindowAnimations();
+
         text_msg = (TextInputEditText) findViewById(R.id.text_msg);
         name_chat = (TextView) findViewById(R.id.name_chat);
         send_message_btn = (ImageView) findViewById(R.id.send_message_btn);
+        send_audio_btn = (ImageView) findViewById(R.id.send_audio_btn);
         chat_messages_recycler = (RecyclerView) findViewById(R.id.chat_messages);
 
         Bundle bundle = getIntent().getExtras();
 
         if (bundle != null) {
-            name_chat.setText(bundle.getString("chat_name"));
+            name_chat.setText("some name");
         }
 
         //mToolbar.setLogo(R.drawable.avatar_contact);
-        mToolbar.setTitle(getIntent().getStringExtra("chat_name"));
+        mToolbar.setTitle("some name");
 
         ChatItemsViewAdapter chatItemsViewAdapter = new ChatItemsViewAdapter(getChatItems(),ChatActivity.this);
         chat_messages_recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -70,9 +94,13 @@ public class ChatActivity extends AppCompatActivity {
         text_msg.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                /*if(keyEvent.getCharacters() != null){
 
-                }*/
+
+                if(keyEvent.getCharacters() != null){
+                    switchToText(true);
+                }else{
+                    switchToText(false);
+                }
                 return false;
             }
         });
@@ -82,9 +110,80 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View view) {
                 //nickson();
                 //@TODO: button send click actions
+                text_msg.setText("");
             }
         });
 
+        send_audio_btn.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                switch(motionEvent.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        anim = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.scaleout);
+                        anim.setInterpolator(new OvershootInterpolator());
+                        send_audio_btn.startAnimation(anim);
+
+                        mAudioPlayer = new Audio();
+                        mAudioPlayer.startRecording();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        mAudioPlayer.stopRecording();
+                        mAudioPlayer.fileExists();
+
+                        //@TODO: send audio message
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        /*if(MotionEvent.obtain(200,2000,MotionEvent.ACTION_UP,0,30)){
+
+                        }*/
+
+                        //@TODO: Listen for moving finger on screen to terminate recording ...
+                        break;
+                    default:
+                        break;
+                }
+                return false;
+            }
+        });
+
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("Toolbar","Clicked");
+            }
+        });
+
+    }
+
+
+
+
+    private void setupWindowAnimations() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Slide slideLOLLIPOP = new Slide();
+            slideLOLLIPOP.setDuration(1000);
+            getWindow().setExitTransition(slideLOLLIPOP);
+        }
+    }
+
+    private void switchToText(boolean toText){
+        anim = AnimationUtils.loadAnimation(this,R.anim.slide_in_up);
+        if(toText){
+            anim = AnimationUtils.loadAnimation(this,R.anim.alpha);
+            anim.reset();
+            send_audio_btn.clearAnimation();
+            send_audio_btn.startAnimation(anim);
+        }else{
+            anim = AnimationUtils.loadAnimation(this,R.anim.alpha);
+            anim.reset();
+            send_message_btn.clearAnimation();
+            send_message_btn.startAnimation(anim);
+        }
+    }
+
+    private void loadMessages(){
+        Query query = messageRefInChat.whereEqualTo("by_uid",FirebaseAuth.getInstance().getUid());
     }
 
     private List<ChatMessage> getChatItems() {
@@ -98,6 +197,13 @@ public class ChatActivity extends AppCompatActivity {
         list.add(new ImageMessage(UID,"",4665465,MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER));
 
         return list;
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Window window = getWindow();
+        window.setFormat(PixelFormat.RGBA_8888);
     }
 
     @Override

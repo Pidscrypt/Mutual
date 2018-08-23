@@ -3,20 +3,14 @@ package pidscrypt.world.mutual.mutal.api;
 import android.view.Gravity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 
 public class ChatMessage {
     private String senderId;
 
-    @SerializedName("message")
-    @Expose
     private Object message;
     private long message_time;
     private int messageStatus;
 
-    @SerializedName("type")
-    @Expose
     private int messageType;
     private int messageGravity;
 

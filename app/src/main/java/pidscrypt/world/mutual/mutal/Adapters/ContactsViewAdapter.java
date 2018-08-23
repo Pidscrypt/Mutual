@@ -1,16 +1,19 @@
 package pidscrypt.world.mutual.mutal.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import pidscrypt.world.mutual.mutal.ChatActivity;
 import pidscrypt.world.mutual.mutal.R;
 import pidscrypt.world.mutual.mutal.api.Contact;
 
@@ -37,6 +40,13 @@ public class ContactsViewAdapter extends RecyclerView.Adapter<ContactsViewAdapte
         chatsViewHolder.contact_name.setText(contacts_list.get(i).getName());
         chatsViewHolder.contact_tag.setText(contacts_list.get(i).getTag());
         chatsViewHolder.contact_img.setImageResource(contacts_list.get(i).getImg());
+
+        chatsViewHolder.contact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mContext.startActivity(new Intent(mContext, ChatActivity.class));
+            }
+        });
     }
 
     @Override
@@ -48,6 +58,7 @@ public class ContactsViewAdapter extends RecyclerView.Adapter<ContactsViewAdapte
 
         TextView contact_name, contact_tag;
         ImageView contact_img;
+        LinearLayout contact;
 
         public ContactsViewHolder(View itemView) {
             super(itemView);
@@ -56,6 +67,7 @@ public class ContactsViewAdapter extends RecyclerView.Adapter<ContactsViewAdapte
             contact_name = (TextView) itemView.findViewById(R.id.contact_name);
             contact_tag = (TextView) itemView.findViewById(R.id.contact_tag);
             contact_img = (CircleImageView) itemView.findViewById(R.id.contact_img);
+            contact = (LinearLayout) itemView.findViewById(R.id.contact);
         }
 
         @Override

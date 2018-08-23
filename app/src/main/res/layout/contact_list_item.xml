@@ -12,6 +12,7 @@
         android:orientation="horizontal"
         android:background="@color/colorPrimary"
         android:padding="4dp"
+        android:id="@+id/contact"
         android:weightSum="10">
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="50dp"
