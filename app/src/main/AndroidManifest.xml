@@ -15,6 +15,16 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+
     <application
         android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
@@ -54,17 +64,27 @@
         <activity
             android:name=".ChatActivity"
             android:parentActivityName=".LandingActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".EnterUserActivity" />
         <activity
             android:name=".ChatMediaActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".SendMessageToActivity"
-            android:parentActivityName=".LandingActivity"/>
+        <activity
+            android:name=".SendMessageToActivity"
+            android:parentActivityName=".LandingActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="7b576f4e3c4f036dbde54b650e35df2e55250ad9" />
+
+        <activity
+            android:name=".MyProfileActivity"
+            android:parentActivityName=".LandingActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat"/>
     </application>
 
 </manifest>

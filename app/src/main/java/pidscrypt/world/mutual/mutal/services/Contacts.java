@@ -5,16 +5,29 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Build;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import pidscrypt.world.mutual.mutal.R;
 import pidscrypt.world.mutual.mutal.api.Contact;
+import pidscrypt.world.mutual.mutal.api.DatabaseNode;
+import pidscrypt.world.mutual.mutal.user.MutualUser;
 
 public class Contacts {
 
     private Context mContext;
+    private CollectionReference users = FirebaseFirestore.getInstance().collection(DatabaseNode.USERS);
 
     /*
      * Defines an array that contains column names to move from
@@ -57,13 +70,21 @@ public class Contacts {
             if(eraser.contains(phone)){
                 continue;
             }
+            final Contact cont = new Contact(
+                    cursor.getString(cursor.getColumnIndex(FROM_COLUMNS[0])),
+                    phone,
+                    R.drawable.avatar_contact);
 
             //@TODO: check firebase for contact exists
-            list.add(
-                    new Contact(
-                            cursor.getString(cursor.getColumnIndex(FROM_COLUMNS[0])),
-                            phone,
-                            R.drawable.avatar_contact));
+            Query usersQuery = users.whereEqualTo("phone",phone);
+            usersQuery.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    String obj = queryDocumentSnapshots.getDocuments().get(0).get("image_uri").toString();
+                    cont.setImage_uri(obj);
+                }
+            });
+            list.add(cont);
 
             eraser.add(phone);
         }

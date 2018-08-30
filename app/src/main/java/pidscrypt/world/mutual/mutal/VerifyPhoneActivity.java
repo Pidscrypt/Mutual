@@ -1,5 +1,6 @@
 package pidscrypt.world.mutual.mutal;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -65,6 +66,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
         //and sending the verification code to the number
         Intent intent = getIntent();
         mobile = intent.getStringExtra("mobile");
+
         sendVerificationCode(mobile);
 
 
@@ -109,14 +111,55 @@ public class VerifyPhoneActivity extends AppCompatActivity {
     //the method is sending verification code
     //the country id is concatenated
     //you can take the country id as user input as well
-    private void sendVerificationCode(String mobile) {
+    private void sendVerificationCode(final String mobile) {
+
+
+        @SuppressLint("HandlerLeak") final Handler h = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+            }
+        };
+
+        Runnable verifyRunnable = new Runnable() {
+            @SuppressLint("StaticFieldLeak")
+            @Override
+            public void run() {
+                synchronized (this){
+                    new PhoneVerificationHandler(){
+                        @Override
+                        public void responseRecieved(Boolean res) {
+                            super.responseRecieved(res);
+                            Toast.makeText(VerifyPhoneActivity.this, res?"Loading ...":"Connection failed!", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void verifyComplete(String code) {
+                            super.verifyComplete(code);
+                            if (code != null) {
+                                editTextCode.setText(code);
+                                //verifying the code
+                                verifyVerificationCode(code);
+                            }
+                        }
+
+                        @Override
+                        public void codeSent(String s) {
+                            super.codeSent(s);
+                            //storing the verification id that is sent to the user
+                            mVerificationId = s;
+                        }
+                    }.execute(mobile);
+                }
+
+                h.sendEmptyMessage(0);
+            }
+        };
+
+        Thread verifyThread = new Thread(null, verifyRunnable);
+        verifyThread.start();
+
         //startTimer();
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                mobile,
-                60,
-                TimeUnit.SECONDS,
-                TaskExecutors.MAIN_THREAD,
-                mCallbacks);
     }
 
     /**
@@ -163,40 +206,6 @@ public class VerifyPhoneActivity extends AppCompatActivity {
         timerUIThread.start();
 
     }
-
-
-    //the callback to detect the verification status
-    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-        @Override
-        public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-
-            //Getting the code sent by SMS
-            String code = phoneAuthCredential.getSmsCode();
-
-            //sometime the code is not detected automatically
-            //in this case the code will be null
-            //so user has to manually enter the code
-            if (code != null) {
-                editTextCode.setText(code);
-                //verifying the code
-                verifyVerificationCode(code);
-            }
-        }
-
-        @Override
-        public void onVerificationFailed(FirebaseException e) {
-            Toast.makeText(VerifyPhoneActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-
-        @Override
-        public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
-            super.onCodeSent(s, forceResendingToken);
-
-            //storing the verification id that is sent to the user
-            mVerificationId = s;
-        }
-    };
-
 
     private void verifyVerificationCode(String code) {
         //creating the credential

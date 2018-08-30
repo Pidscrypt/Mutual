@@ -2,6 +2,7 @@ package pidscrypt.world.mutual.mutal.Adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +16,15 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
+import pidscrypt.world.mutual.mutal.ChatsFragment;
 import pidscrypt.world.mutual.mutal.R;
 import pidscrypt.world.mutual.mutal.api.Chat;
+import pidscrypt.world.mutual.mutal.api.ChatMessage;
 import pidscrypt.world.mutual.mutal.api.MessageStatus;
+import pidscrypt.world.mutual.mutal.api.MutualDateFormat;
+import pidscrypt.world.mutual.mutal.user.MutualUser;
 
-public class ChatAdapter extends FirestoreRecyclerAdapter<Chat,ChatAdapter.ChatHolder> {
+public class ChatAdapter extends FirestoreRecyclerAdapter<ChatMessage,ChatAdapter.ChatHolder> {
 
 
     /**
@@ -28,15 +33,15 @@ public class ChatAdapter extends FirestoreRecyclerAdapter<Chat,ChatAdapter.ChatH
      *
      * @param options
      */
-    public ChatAdapter(FirestoreRecyclerOptions<Chat> options) {
+    public ChatAdapter(FirestoreRecyclerOptions<ChatMessage> options) {
         super(options);
     }
 
     @Override
-    protected void onBindViewHolder(ChatHolder holder, int position, Chat model) {
-        holder.name.setText(model.getName());
-        holder.numOfUnreadMessages.setText(model.getUnreadmessages());
-        holder.time.setText(model.getTime().toString());
+    protected void onBindViewHolder(ChatHolder holder, int position, ChatMessage model) {
+        holder.name.setText("dummy name");
+        holder.numOfUnreadMessages.setText("2");
+        holder.time.setText(DateFormat.format(MutualDateFormat.SHORT,model.getTime_sent()));
         holder.message.setText(model.getMessage());
 
         switch(model.getMessageStatus()){
@@ -60,11 +65,11 @@ public class ChatAdapter extends FirestoreRecyclerAdapter<Chat,ChatAdapter.ChatH
                 break;
         }
 
-        if(model.getImageUri().equals("")){
+        //if(model.getImage_uri().trim().equals("")){
             holder.image.setImageResource(R.drawable.avatar_contact);
-        }else{
-            Glide.with(holder.image.getContext()).load(model.getImageUri()).into(holder.image);
-        }
+        /*}else{
+            Glide.with(holder.image.getContext()).load(model.getImage_uri()).into(holder.image);
+        }*/
 
     }
 
@@ -85,6 +90,10 @@ public class ChatAdapter extends FirestoreRecyclerAdapter<Chat,ChatAdapter.ChatH
     public ChatHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.chat_item,viewGroup,false);
         return new ChatHolder(view);
+    }
+
+    public void deleteChat(int position){
+        getSnapshots().getSnapshot(position).getReference().delete();
     }
 
     class ChatHolder extends RecyclerView.ViewHolder {

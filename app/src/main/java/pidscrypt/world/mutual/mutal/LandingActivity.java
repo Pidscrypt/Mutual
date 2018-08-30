@@ -27,7 +27,6 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
     private LandingPagerAdapter landingPagerAdapter;
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener firebaseAuthState;
-    private FloatingActionButton fab_new_message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +41,6 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
 
         TabLayout mTabLayout = (TabLayout) findViewById(R.id.tabs);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
-        fab_new_message = (FloatingActionButton) findViewById(R.id.fab_new_message);
         mViewPager.setAdapter(landingPagerAdapter);
         mTabLayout.setTabsFromPagerAdapter(landingPagerAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
@@ -69,13 +67,6 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
                 }
             }
         };
-
-        fab_new_message.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LandingActivity.this,SendMessageToActivity.class));
-            }
-        });
 
     }
 
@@ -126,7 +117,7 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
 
         switch(id){
             case R.id.action_settings:
-                Intent settings_activity = new Intent(LandingActivity.this, SettingsActivity.class);
+                Intent settings_activity = new Intent(LandingActivity.this, MyProfileActivity.class);
                 startActivity(settings_activity);
                 break;
             case R.id.action_gallery:

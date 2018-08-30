@@ -3,19 +3,44 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/message_root"
-        >
-
-        <TextView
-            android:id="@+id/message_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RelativeLayout
             android:layout_width="wrap_content"
+            android:minWidth="20dp"
             android:layout_height="wrap_content"
-            android:text="10:45 PM"
-            android:textSize="12sp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            />
+            android:layout_alignParentStart="true"
+            android:id="@+id/message_root">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/message" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginTop="8dp">
+                <TextView
+                    android:id="@+id/message_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10:45 PM"
+                    android:textSize="12sp"
+                    android:drawablePadding="5dp"
+                    />
+                <ImageView
+                    android:id="@+id/message_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10:45 PM"
+                    android:drawablePadding="5dp"
+                    />
+            </LinearLayout>
+
+        </RelativeLayout>
     </RelativeLayout>
+
 </RelativeLayout>

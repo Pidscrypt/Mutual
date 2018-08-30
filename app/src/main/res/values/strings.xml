@@ -183,4 +183,17 @@
     <string name="grey_dull">#444</string>
     <string name="message_tet_placeholder">Message ...</string>
     <string name="action_media">Media</string>
+
+
+    // create user
+    <string name="profile_info_msg">Please provide your name and an optional profile photo</string>
+
+
+    // user list screen
+    <string name="activity_user_list_label">Select a contact</string>
+    <string name="type_your_name_here">Type your name here</string>
+    <string name="display_name">Display name</string>
+    <string name="display_status">Hi! Look, am using Mutual chat!</string>
+    <string name="change_image">change image</string>
+    <string name="change_status">change status</string>
 </resources>

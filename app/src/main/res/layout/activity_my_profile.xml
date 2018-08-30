@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MyProfileActivity"
+    android:background="@drawable/backgroud_gradient"
+    android:gravity="center_horizontal">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/red_bottom"
+        android:minHeight="?attr/actionBarSize"
+        app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:title="My profile"
+        app:titleTextColor="@color/colorPrimaryDark">
+
+    </android.support.v7.widget.Toolbar>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="170dp"
+        android:layout_height="170dp"
+        android:layout_marginTop="30dp"
+        android:id="@+id/my_image"
+        android:layout_below="@id/toolbar"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/avatar_contact"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/display_name"
+        android:textSize="24sp"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/my_image"
+        android:text="@string/display_name"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/display_status"
+        android:textSize="14sp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:layout_below="@+id/display_name"
+        android:text="@string/display_status"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/change_image"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/btn_change_status"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/btn_change_img"
+            android:paddingEnd="25dp"
+            android:paddingStart="25dp"
+            android:background="@drawable/rect_oval_draw"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:paddingEnd="20dp"
+            android:textColor="@color/colorPrimary"
+            android:paddingStart="20dp"
+            android:layout_marginBottom="30dp"
+            android:text="@string/change_status"
+            android:id="@+id/btn_change_status"
+            android:background="@drawable/btn_mutual"/>
+
+</RelativeLayout>

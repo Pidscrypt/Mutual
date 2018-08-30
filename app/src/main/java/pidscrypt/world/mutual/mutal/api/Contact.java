@@ -7,6 +7,7 @@ public class Contact {
         private String number;
         private int img;
         private String tag;
+        private String image_uri;
 
     public Contact(String name, String tag, int img) {
         this.name = name;
@@ -44,5 +45,13 @@ public class Contact {
 
     public void setImg(int img) {
         this.img = img;
+    }
+
+    public String getImage_uri() {
+        return image_uri;
+    }
+
+    public void setImage_uri(String image_uri) {
+        this.image_uri = image_uri;
     }
 }

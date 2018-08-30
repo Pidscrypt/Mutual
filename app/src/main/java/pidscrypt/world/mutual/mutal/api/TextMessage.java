@@ -5,12 +5,10 @@ import java.util.Date;
 public class TextMessage extends ChatMessage {
 
     public TextMessage() {
-
+        super();
     }
 
-    public TextMessage(String sender, String messageText, long messageTime, int status) {
-        super(sender, messageText,messageTime,status);
-        super.setMessageType(MessageType.TEXT);
+    public TextMessage(String senderId, String receiverId, String message) {
+        super(senderId, receiverId, message, MessageType.TEXT);
     }
-
 }

@@ -1,71 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+    android:background="@drawable/mutual_bg_waves"
+tools:context=".EnterUserActivity">
+<TextView
+    android:id="@+id/profileInfoTV"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="20dp"
+    android:text="Profile Info"
+    android:textColor="@color/colorPrimary"
+    android:textSize="18sp"
+    android:textStyle="bold" />
+
+<TextView
+    android:id="@+id/profileInfoMsgTV"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/profileInfoTV"
+    android:layout_centerHorizontal="true"
+    android:layout_marginLeft="30dp"
+    android:layout_marginRight="30dp"
+    android:layout_marginTop="20dp"
+    android:gravity="center"
+    android:text="@string/profile_info_msg" />
+
+
+<android.support.v7.widget.CardView
+    android:id="@+id/newUserRL"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".EnterUserActivity">
-    <LinearLayout
+    android:layout_height="wrap_content"
+    android:layout_below="@id/profileInfoMsgTV"
+    android:layout_centerHorizontal="true"
+    android:padding="15dp"
+    android:layout_marginLeft="15dp"
+    android:layout_marginRight="15dp"
+    android:layout_marginTop="15dp">
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/user_img"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="#c9c5c5"
+        android:src="@drawable/permission_cam" />
+
+    <EditText
+        android:id="@+id/user_name"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:inputType="textPersonName"
+        android:layout_height="wrap_content"
+        android:background="@drawable/red_bottom"
+        android:hint="@string/type_your_name_here" />
+</LinearLayout>
+
+
+    <EditText
+        android:id="@+id/user_tag"
+        android:layout_marginTop="16dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="30dp"
-        android:background="@drawable/mutual_bg_waves">
-        <android.support.v7.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
-            android:padding="20dp"
-            android:minHeight="120dp"
-            android:background="@color/colorPrimary"
-            android:layout_gravity="center">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:background="@drawable/red_bottom"
+        android:hint="Tag line" />
+</android.support.v7.widget.CardView>
 
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/user_img"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_gravity="start"
-                    android:contentDescription="user image"
-                    android:src="@drawable/avatar_contact" />
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/user_name"
-                    android:layout_marginStart="12dp"
-                    android:background="@drawable/red_bottom"
-                    android:hint="@string/enter_name_placeholder"
-                    android:inputType="textPersonName"
-                    android:layout_gravity="center_vertical"
-                    android:textColorHint="@color/colorAccent" />
+<Button
+    android:id="@+id/btn_submit_user_details"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Next"
+    android:background="@drawable/btn_mutual"
+    android:textColor="@color/colorPrimary"
+    android:layout_centerHorizontal="true"
+    android:layout_marginBottom="20dp"
+    android:layout_alignParentBottom="true"
+    />
 
-            </LinearLayout>
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:id="@+id/user_tag"
-                android:layout_marginStart="12dp"
-                android:background="@drawable/red_bottom"
-                android:hint="@string/enter_name_placeholder"
-                android:inputType="textPersonName"
-                android:layout_gravity="bottom"
-                android:textColorHint="@color/colorAccent" />
-        </android.support.v7.widget.CardView>
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_submit_user_details"
-            android:text="@string/complete_setup"
-            android:textColor="@color/colorPrimary"
-            android:background="@drawable/btn_mutual"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp" />
-    </LinearLayout>
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>
