@@ -25,6 +25,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import pidscrypt.world.mutual.mutal.Database.MutualDB;
 
 import static java.lang.Thread.sleep;
@@ -39,6 +42,11 @@ public class Welcome extends AppCompatActivity {
     private ImageView logo;
     private LinearLayout logo_container;
     private Button btn_continue;
+    private Handler handler;
+    private Runnable runnable;
+    private static final int SPLASH_TIME = 2000;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseAuth.AuthStateListener firebaseAuthState;
 
     @Override
     public void onAttachedToWindow() {
@@ -52,38 +60,58 @@ public class Welcome extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_welcome);
-        setupWindowAnimations();
 
-        ActionBar actionBar = getSupportActionBar();
-        assert actionBar != null;
-        actionBar.hide();
+        //ActionBar actionBar = getSupportActionBar();
+        //actionBar.hide();
 
         welcome_reveal = (LinearLayout)findViewById(R.id.moving_bg);
         btn_continue = (Button) findViewById(R.id.btn_continue);
         logo = findViewById(R.id.logo);
         logo_container = (LinearLayout) findViewById(R.id.logo_container);
 
-        startAnimation();
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                firebaseAuth = FirebaseAuth.getInstance();
+                        //FireBaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        FirebaseUser user = firebaseAuth.getInstance().getCurrentUser();
 
-        btn_continue.setOnClickListener(new View.OnClickListener() {
+
+                        if(user == null){
+                            PhoneAuthActivity.startIntent(Welcome.this, Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        }else{
+                            LandingActivity.startActivity(Welcome.this, Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        }
+
+                        handler.sendEmptyMessage(0);
+                        overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_done);
+                        finish();
+
+            }
+        };
+        startAnimation();
+        handler.postDelayed(runnable, SPLASH_TIME);
+/*
+        Thread chooseWelcomeThread = new Thread(runnable);
+        startAnimation();
+        chooseWelcomeThread.start();*/
+
+
+
+
+        //startAnimation();
+
+        /*btn_continue.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(Welcome.this,PhoneAuthActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i);
                 Welcome.this.finish();
             }
-        });
+        });*/
 
-    }
-
-    private void setupWindowAnimations() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            Slide slideLOLLIPOP = new Slide();
-            slideLOLLIPOP.setDuration(1000);
-            getWindow().setExitTransition(slideLOLLIPOP);
-        }
     }
 
     public void startAnimation(){
@@ -102,4 +130,5 @@ public class Welcome extends AppCompatActivity {
         logo_container.clearAnimation();
         logo_container.startAnimation(anim);
     }
+
 }

@@ -22,18 +22,21 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.DataFormatException;
 
 import pidscrypt.world.mutual.mutal.Adapters.ChatAdapter;
 import pidscrypt.world.mutual.mutal.Adapters.ChatsViewAdapter;
 import pidscrypt.world.mutual.mutal.Database.Database;
 import pidscrypt.world.mutual.mutal.api.Chat;
 import pidscrypt.world.mutual.mutal.api.ChatMessage;
+import pidscrypt.world.mutual.mutal.api.Conversation;
 import pidscrypt.world.mutual.mutal.api.DatabaseNode;
 import pidscrypt.world.mutual.mutal.api.Friend;
 import pidscrypt.world.mutual.mutal.api.MessageStatus;
@@ -44,11 +47,15 @@ public class ChatsFragment extends Fragment {
     private RecyclerView chats_recycler;
     private List<Friend> friend_list;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference messagesRef = db.collection(DatabaseNode.MESSAGES);
+    private DocumentReference messagesRef;
+    private CollectionReference usersRef;
+    private CollectionReference chatsRef;
     private ChatAdapter chatAdapter;
     private FirebaseUser  firebaseUser;
     private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
 
+
+    public ChatsFragment(){}
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,6 +70,9 @@ public class ChatsFragment extends Fragment {
         chats_recycler = layout.findViewById(R.id.chats_recycler);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        chatsRef = db.collection(DatabaseNode.CHATS);
+        usersRef = db.collection(DatabaseNode.USERS);
+        messagesRef = db.collection(DatabaseNode.MESSAGES).document(firebaseUser.getUid());
         db.setFirestoreSettings(settings);
         setupChats(layout);
 
@@ -71,14 +81,14 @@ public class ChatsFragment extends Fragment {
 
     @SuppressLint("SetTextI18n")
     private void setupChats(View view){
-        //Query query = messagesRef.orderBy("time", Query.Direction.DESCENDING);
-        Query query = messagesRef.whereEqualTo("senderId", firebaseUser.getUid());
-        FirestoreRecyclerOptions<ChatMessage> options = new FirestoreRecyclerOptions.Builder<ChatMessage>().setQuery(query,ChatMessage.class).build();
+        Query query = chatsRef.document(firebaseUser.getUid()).collection("conversations").orderBy("timestamp", Query.Direction.DESCENDING);
+        //Query query = messagesRef.whereEqualTo("senderId", firebaseUser.getUid());
+        FirestoreRecyclerOptions<Conversation> options = new FirestoreRecyclerOptions.Builder<Conversation>().setQuery(query,Conversation.class).build();
 /*
         if(options.getSnapshots().isEmpty()){
             final  RecyclerView emptyChatsRecycler = view.findViewById(R.id.chats_recycler);
         }else{*/
-            chatAdapter = new ChatAdapter(options);
+            chatAdapter = new ChatAdapter(options, getContext());
 
             final RecyclerView chatsRecycler = view.findViewById(R.id.chats_recycler);
             chatsRecycler.setHasFixedSize(true);
@@ -86,19 +96,14 @@ public class ChatsFragment extends Fragment {
             chatsRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
             chatsRecycler.setAdapter(chatAdapter);
 
-            new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-                @Override
-                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
-                    return false;
-                }
-
-                @Override
-                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-                    //chatAdapter.deleteChat(viewHolder.getAdapterPosition());
-                }
-            }).attachToRecyclerView(chatsRecycler);
         //}
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        chatAdapter.startListening();
     }
 
     @Override

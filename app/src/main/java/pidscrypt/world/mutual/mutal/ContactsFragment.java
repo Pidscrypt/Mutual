@@ -20,12 +20,20 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import pidscrypt.world.mutual.mutal.Adapters.ContactsViewAdapter;
 import pidscrypt.world.mutual.mutal.api.Contact;
+import pidscrypt.world.mutual.mutal.api.DatabaseNode;
 import pidscrypt.world.mutual.mutal.services.Contacts;
+import pidscrypt.world.mutual.mutal.user.MutualUser;
 
 
 public class ContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnClickListener {
@@ -33,6 +41,9 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
 
     private RecyclerView contacts_recycler;
     private List<Contact> contacts_list;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference userRef;
+    private ContactsViewAdapter contactsViewAdapter;
 
     /*
      * Defines an array that contains resource ids for the layout views
@@ -87,57 +98,48 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         // Inflate the layout for this fragment
         View layout = inflater.inflate(R.layout.fragment_contacts, container, false);
         contacts_recycler = layout.findViewById(R.id.contacts_recycler_view);
+        userRef = db.collection(DatabaseNode.USERS);
 
         mContacts = new Contacts(getContext());
 
-        ContactsViewAdapter contactsViewAdapter = new ContactsViewAdapter(mContacts.fetch(),getContext());
+        /*ContactsViewAdapter contactsViewAdapter = new ContactsViewAdapter(mContacts.fetch(),getContext());
         contacts_recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        contacts_recycler.setAdapter(contactsViewAdapter);
+        contacts_recycler.setAdapter(contactsViewAdapter);*/
+
+        setupContacts(layout);
 
         //contacts_recycler.setOnClickListener(this);
 
         return layout;
     }
-/*
-    public List<Contact> getContacts(){
 
-        List<Contact> list = new ArrayList<>();
-        List<String> eraser = new ArrayList<>();
+    @SuppressLint("SetTextI18n")
+    private void setupContacts(View view){
+        Query query = userRef;
 
-        // cursor get all contacts in the phone
-        Cursor cursor = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null, null,FROM_COLUMNS[0] + " ASC");
+        FirestoreRecyclerOptions<MutualUser> options = new FirestoreRecyclerOptions.Builder<MutualUser>().setQuery(query,MutualUser.class).build();
 
-        cursor.moveToFirst();
+        contactsViewAdapter = new ContactsViewAdapter(options, getContext());
 
-        while(cursor.moveToNext()){
-            String phone = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            if(phone.startsWith("0")){
-                //@TODO: change this to auto detect country code
-                phone = "+256" + phone.substring(1);
-            }
-            if(phone.contains(" ")){
-                phone = phone.replaceAll(" ","");
-            }
-            if(eraser.contains(phone)){
-                continue;
-            }
+        final RecyclerView contactsRecycler = view.findViewById(R.id.contacts_recycler_view);
+        contactsRecycler.setHasFixedSize(true);
 
-            //@TODO: check firebase for contact exists
-            list.add(
-                    new Contact(
-                            cursor.getString(cursor.getColumnIndex(FROM_COLUMNS[0])),
-                            phone,
-                            R.drawable.avatar_contact));
+        contactsRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        contactsRecycler.setAdapter(contactsViewAdapter);
 
-            eraser.add(phone);
-        }
 
-        return list;
-    }*/
+    }
 
     @Override
     public void onStart() {
         super.onStart();
+        contactsViewAdapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        contactsViewAdapter.stopListening();
     }
 
     @NonNull

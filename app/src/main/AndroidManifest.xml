@@ -41,8 +41,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".Friend_Chat" />
@@ -53,9 +51,13 @@
         <activity
             android:name=".Welcome"
             android:label="@string/title_activity_welcome"
+            android:launchMode="singleTop"
             android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".UserDetailsActivity" />
@@ -68,10 +70,6 @@
         <activity android:name=".EnterUserActivity" />
         <activity
             android:name=".ChatMediaActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".SendMessageToActivity"
-            android:parentActivityName=".LandingActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data

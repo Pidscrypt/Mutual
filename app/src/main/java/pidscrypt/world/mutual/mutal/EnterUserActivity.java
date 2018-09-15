@@ -1,7 +1,11 @@
 package pidscrypt.world.mutual.mutal;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
@@ -30,15 +34,22 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+import id.zelory.compressor.Compressor;
 import io.fabric.sdk.android.Fabric;
 import pidscrypt.world.mutual.mutal.api.DatabaseNode;
 import pidscrypt.world.mutual.mutal.api.MessageType;
 import pidscrypt.world.mutual.mutal.api.MutualDateFormat;
+import pidscrypt.world.mutual.mutal.api.UserStatus;
 import pidscrypt.world.mutual.mutal.user.MutualUser;
 
 import static java.lang.Thread.sleep;
@@ -46,24 +57,25 @@ import static java.lang.Thread.sleep;
 public class EnterUserActivity extends AppCompatActivity {
 
     private Button btn_submit_user_details;
-    private ImageView userImage;
-    private Uri image_uri;
+    private CircleImageView userImage;
     private EditText username, user_tag;
     private String uid;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private StorageReference mStorage = FirebaseStorage.getInstance().getReference();
     private CollectionReference usersRef = db.collection(DatabaseNode.USERS);
     private FirebaseAuth.AuthStateListener firebaseAuthState;
+    private ProgressDialog mProgress;
+    private String image_uri = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_user);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+        //actionBar.hide();
 
         btn_submit_user_details = (Button) findViewById(R.id.btn_submit_user_details);
-        userImage = (ImageView) findViewById(R.id.user_img);
+        userImage = (CircleImageView) findViewById(R.id.user_img);
         username = (EditText) findViewById(R.id.user_name);
         user_tag = (EditText) findViewById(R.id.user_tag);
 
@@ -74,9 +86,15 @@ public class EnterUserActivity extends AppCompatActivity {
         userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+                Intent galleryIntent = new Intent();
                 galleryIntent.setType("image/*");
-                startActivityForResult(galleryIntent,2);
+                galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    startActivityForResult(Intent.createChooser(galleryIntent, "CHOOSE PROFILE IMAGE"),1);
+                }else{
+                    startActivityForResult(galleryIntent,1);
+                }
             }
         });
 
@@ -85,20 +103,24 @@ public class EnterUserActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(uid != null){
 
+                    btn_submit_user_details.setEnabled(false);
+
                     DocumentReference userRef = FirebaseFirestore.getInstance().collection(DatabaseNode.USERS).document(uid);
                     String user_name = username.getText().toString();
                     if(user_name.trim().isEmpty()){
                         username.setError("please enter user name");
                         username.requestFocus();
                     }else{
-                        Map<String, String> user = new HashMap<>();
-                        user.put("name", user_name);
-                        user.put("phone",phone);
-                        user.put("status",user_tag.getText().toString().trim().isEmpty()?"Hi! Look, am using Mutual Chat!":user_tag.getText().toString().trim());
-                        user.put("image_uri", image_uri != null?String.valueOf(image_uri):"");
-                        user.put("image_thumbnail", image_uri != null?String.valueOf(image_uri):"");
-                        user.put("uid",uid);
-                        user.put("reg_date", String.valueOf(new Date().getTime()));
+                        long last_seen = new Date().getTime();
+                        MutualUser user = new MutualUser(
+                                user_name,
+                                phone,
+                                image_uri != null?image_uri:"",
+                                user_tag.getText().toString().trim().isEmpty()?"Hi! Look, am using Mutual Chat!":user_tag.getText().toString().trim(),
+                                uid,
+                                last_seen,
+                                UserStatus.ONLINE
+                        );
 
                         userRef.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -145,24 +167,86 @@ public class EnterUserActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 2 && resultCode == RESULT_OK){
-            //sendMessage(MessageType.IMAGE, data);
-            Uri imageUri = data.getData();
-            final StorageReference filepath = mStorage.child("images").child(imageUri.getLastPathSegment());
-            filepath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    image_uri = taskSnapshot.getUploadSessionUri();
-                    Glide.with(EnterUserActivity.this).load(image_uri).into(userImage);
+        if(requestCode == 1 && resultCode == RESULT_OK){
+            Uri image_uri = data.getData();
+            // start cropping activity for pre-acquired image saved on the device
+            CropImage.activity(image_uri)
+                    .setAspectRatio(1,1)
+                    .start(this);
+
+        }
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                mProgress = new ProgressDialog(EnterUserActivity.this);
+                mProgress.setTitle("Updating Image");
+                mProgress.setMessage("please wait while we update status!");
+                mProgress.setCanceledOnTouchOutside(false);
+                mProgress.show();
+
+                Uri resultUri = result.getUri();
+
+                File thumb_filePathRef = new File(resultUri.getPath());
+                final byte[] thumb_byte;
+
+                try {
+                    Bitmap thumb_bitmap = new Compressor(this)
+                            .setMaxWidth(200)
+                            .setMaxHeight(200)
+                            .setQuality(75)
+                            .compressToBitmap(thumb_filePathRef);
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    thumb_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+                    thumb_byte = byteArrayOutputStream.toByteArray();
+
+                    final StorageReference filepath = mStorage.child(DatabaseNode.PROFIILE_IMAGES).child(resultUri.getLastPathSegment());
+                    final StorageReference thumb_filepath = mStorage.child(DatabaseNode.PROFIILE_IMAGES).child(DatabaseNode.THUMBNAILS).child(resultUri.getLastPathSegment());
+
+                    filepath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if(task.isSuccessful()){
+                                filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+
+                                        image_uri = uri.toString();
+
+                                        UploadTask uploadTask = thumb_filepath.putBytes(thumb_byte);
+                                        uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> thumb_task) {
+                                                //@todo: save thumbnail details too.
+                                            }
+                                        });
+
+                                        Glide.with(EnterUserActivity.this).load(image_uri).into(userImage);
+                                        mProgress.dismiss();
+
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        mProgress.dismiss();
+                                        Toast.makeText(EnterUserActivity.this, "Failed to update profile.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                mProgress.dismiss();
+                            }else{
+                                mProgress.dismiss();
+                                Toast.makeText(EnterUserActivity.this,"image upload failed",Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(EnterUserActivity.this,"image upload failed",Toast.LENGTH_SHORT).show();
-                }
-            });
+
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
         }
     }
 

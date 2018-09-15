@@ -40,6 +40,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.data.model.User;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -69,12 +72,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import pidscrypt.world.mutual.mutal.Adapters.ChatMessagesViewAdapter;
 import pidscrypt.world.mutual.mutal.api.Chat;
 import pidscrypt.world.mutual.mutal.api.ChatMessage;
+import pidscrypt.world.mutual.mutal.api.Conversation;
 import pidscrypt.world.mutual.mutal.api.DatabaseNode;
 import pidscrypt.world.mutual.mutal.api.ImageMessage;
+import pidscrypt.world.mutual.mutal.api.MessageStatus;
 import pidscrypt.world.mutual.mutal.api.MessageType;
+import pidscrypt.world.mutual.mutal.api.MutualDateFormat;
 import pidscrypt.world.mutual.mutal.api.TextMessage;
 import pidscrypt.world.mutual.mutal.media.Audio;
 import pidscrypt.world.mutual.mutal.messenger.Message;
@@ -82,21 +89,27 @@ import pidscrypt.world.mutual.mutal.user.MutualUser;
 
 public class ChatActivity extends AppCompatActivity {
 
-    private ImageView chat_img;
+    private CircleImageView user_img;
     private TextInputEditText text_msg;
     private static final int ANIM_DURATION = 500;
-    private TextView name_chat;
+    private TextView name_chat, lastSeen;
     private ImageView send_message_btn, send_audio_btn;
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference messageRefInChat = db.collection(DatabaseNode.MESSAGES);
-    private CollectionReference usersRef = db.collection(DatabaseNode.USERS);
-    private CollectionReference chatReference = db.collection(DatabaseNode.CHATS);
+    private CollectionReference messageRefInChat;
+    private CollectionReference usersRef;
+    private DocumentReference chatReference;
+    private DocumentReference OtherChatReference;
     private Animation anim;
     private Audio mAudioPlayer;
     private ChatMessagesViewAdapter chatItemsViewAdapter;
     private ImageView open_cam_btn;
     private StorageReference mStorage;
+    private String chatUId = "";
+    private String mCurrentUserId;
+    private String chatImageUri = "";
+    private String chatPhone = "";
+    private FirebaseAuth firebaseAuth;
     //private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
 
     String mCurrentPhotoPath;
@@ -120,49 +133,97 @@ public class ChatActivity extends AppCompatActivity {
         name_chat = (TextView) findViewById(R.id.name_chat);
         send_message_btn = (ImageView) findViewById(R.id.send_message_btn);
         send_audio_btn = (ImageView) findViewById(R.id.send_audio_btn);
+        lastSeen = (TextView) findViewById(R.id.lastSeen);
 
         open_cam_btn = (ImageView) findViewById(R.id.open_cam_btn);
+        user_img = (CircleImageView) findViewById(R.id.user_img);
 
         mStorage = FirebaseStorage.getInstance().getReference();
+        mCurrentUserId = firebaseAuth.getInstance().getUid();
+
+
+
+        messageRefInChat = db.collection(DatabaseNode.MESSAGES);
+        usersRef = db.collection(DatabaseNode.USERS);
+        chatReference = db.collection(DatabaseNode.CHATS).document(mCurrentUserId);
+
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             Bundle b = bundle.getBundle("chat_details");
-            name_chat.setText(b != null ? b.getString("chat_name") : b.getString("chat_phone"));
-            /*if(Objects.requireNonNull(b).getBoolean("from_contacts")){
-                List<MutualUser> participants = new ArrayList<>();
-                final String[] myName = new String[1];
-                final String[] myPhone = new String[1];
-                final String[] otherOnesId = new String[1];
-                DocumentReference userme = usersRef.document(FirebaseAuth.getInstance().getUid());
-                userme.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                       myName[0] = documentSnapshot.get("name").toString();
-                       myPhone[0] = documentSnapshot.get("phone").toString();
-                        Toast.makeText(ChatActivity.this,myPhone[0],Toast.LENGTH_SHORT).show();
-                    }
-                });
-                Query otheruserquery = usersRef.whereEqualTo("phone",b.getString("chat_phone"));
-                otheruserquery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()){
-                            otherOnesId[0] = task.getResult().getDocuments().get(0).getId();
-                            Toast.makeText(ChatActivity.this,otherOnesId[0],Toast.LENGTH_SHORT).show();
-                        }else{
-                            Toast.makeText(ChatActivity.this,"You are offline",Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-                participants.add(new MutualUser(myName[0],myPhone[0],FirebaseAuth.getInstance().getUid()));
-                participants.add(new MutualUser(name_chat.getText().toString(),b.getString("chat_phone"),otherOnesId[0]));
-                Chat chat = new Chat("shdhjsad",participants);
-                Map<String,Object> chats = new HashMap<>();
-                chats.put("ghjhjcghx",chat);
-                //chatReference.add(chat);
-            }*/
+            name_chat.setText(b.getString("chat_name"));
+            MutualDateFormat timeAgo = new MutualDateFormat();
+            final String last_seen = timeAgo.getTimeAgo(Long.valueOf(b.getString("last_seen")), getApplicationContext());
 
+            //lastSeen.setText(b.getBoolean("isOnline")?"online":last_seen);
+            chatUId = b.getString("uid");
+
+            OtherChatReference = db.collection(DatabaseNode.CHATS).document(chatUId);
+
+            usersRef.document(chatUId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    //MutualDateFormat mTimeAgo = new MutualDateFormat();
+                    long lastTime = Long.parseLong(documentSnapshot.get("last_seen").toString());
+                    String lastSeenTime = MutualDateFormat.getTimeAgo(lastTime, getApplicationContext());
+                    lastSeen.setText(lastSeenTime);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    lastSeen.setText("");
+                }
+            });
+            //lastSeen.setText(?"online":last_seen);
+            chatPhone = b.getString("chat_phone");
+
+            if(!b.getString("image_uri").trim().isEmpty()){
+                RequestOptions requestOptions = new RequestOptions()
+                        .placeholder(R.drawable.avatar_contact)
+                        .error(R.drawable.bg_outline_gray)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL);
+                chatImageUri = b.getString("image_uri");
+                Glide.with(ChatActivity.this).setDefaultRequestOptions(requestOptions).load(b.getString("image_uri")).thumbnail(0.5f).into(user_img);
+            }else{
+                user_img.setImageResource(R.drawable.avatar_contact);
+            }
         }
+
+
+        chatReference.collection("conversations").document(chatUId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(!documentSnapshot.exists()){
+                    final Conversation shared = new Conversation(false, new Date().getTime(), chatImageUri, null);
+                    //mine.setLastMsg("chat set at me");
+                    //mine.setTimestamp(new Date().getTime());
+
+                    usersRef.document(chatUId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            MutualUser user = documentSnapshot.toObject(MutualUser.class);
+                            final Conversation mine = new Conversation(shared.isSeen(), shared.getStart_date(), chatImageUri, user);
+                            mine.setWith(documentSnapshot.getString("phone"));
+                            chatReference.collection("conversations").document(chatUId).set(mine);
+                        }
+                    });
+
+                    usersRef.document(mCurrentUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            MutualUser user = documentSnapshot.toObject(MutualUser.class);
+                            final Conversation others = new Conversation(shared.isSeen(), shared.getStart_date(), documentSnapshot.getString("image_uri"), user);
+                            //others.setLastMsg("chat set at other");
+                            //others.setTimestamp(mine.getTimestamp());
+                            others.setWith(chatPhone);
+                            OtherChatReference.collection("conversations").document(mCurrentUserId).set(others);
+                        }
+                    });
+
+
+
+                }
+            }
+        });
 
         //mToolbar.setLogo(R.drawable.avatar_contact);
         //mToolbar.setTitle("some name");
@@ -174,6 +235,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // TODO Auto-generated method stub
                 if(!s.toString().trim().isEmpty()){
+                    //switchToText(true);
                     send_audio_btn.setVisibility(View.GONE);
                     send_message_btn.setVisibility(View.VISIBLE);
                 }
@@ -190,6 +252,7 @@ public class ChatActivity extends AppCompatActivity {
                 // TODO Auto-generated method stub
                 //status = "Typing"; // where status is a string you send to the other person
                 if(s.toString().trim().isEmpty()){
+                    //switchToText(false);
                     send_audio_btn.setVisibility(View.VISIBLE);
                     send_message_btn.setVisibility(View.GONE);
                 }
@@ -265,13 +328,18 @@ public class ChatActivity extends AppCompatActivity {
         if(requestCode == 2 && resultCode == RESULT_OK){
             //sendMessage(MessageType.IMAGE, data);
             Uri imageUri = data.getData();
-            final StorageReference filepath = mStorage.child("images").child(imageUri.getLastPathSegment());
+            final StorageReference filepath = mStorage.child(DatabaseNode.IMAGES).child(imageUri.getLastPathSegment());
             filepath.putFile(imageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     if(task.isSuccessful()){
-                        Toast.makeText(ChatActivity.this,"upload done",Toast.LENGTH_SHORT).show();
-                        sendMessage(MessageType.IMAGE, task);
+                        filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                sendMessage(MessageType.IMAGE, uri.toString());
+                            }
+                        });
+
                     }else{
                         Toast.makeText(ChatActivity.this,"upload failed",Toast.LENGTH_SHORT).show();
                     }
@@ -292,11 +360,13 @@ public class ChatActivity extends AppCompatActivity {
         anim = AnimationUtils.loadAnimation(this,R.anim.slide_in_up);
         if(toText){
             anim = AnimationUtils.loadAnimation(this,R.anim.alpha);
+            anim.setDuration(200);
             anim.reset();
             send_audio_btn.clearAnimation();
             send_audio_btn.startAnimation(anim);
         }else{
             anim = AnimationUtils.loadAnimation(this,R.anim.alpha);
+            anim.setDuration(200);
             anim.reset();
             send_message_btn.clearAnimation();
             send_message_btn.startAnimation(anim);
@@ -305,7 +375,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void loadMessages(){
 
-        Query query = messageRefInChat.whereEqualTo("senderId",FirebaseAuth.getInstance().getUid()).orderBy("time_sent", Query.Direction.ASCENDING);
+        Query query = messageRefInChat.document(mCurrentUserId).collection(chatUId).orderBy("time_sent", Query.Direction.ASCENDING);
         FirestoreRecyclerOptions<ChatMessage> options = new FirestoreRecyclerOptions.Builder<ChatMessage>().setQuery(query,ChatMessage.class).build();
 
         chatItemsViewAdapter = new ChatMessagesViewAdapter(options,ChatActivity.this);
@@ -315,7 +385,7 @@ public class ChatActivity extends AppCompatActivity {
         chat_messages_recycler.setAdapter(chatItemsViewAdapter);
     }
 
-    private void sendMessage(int messageType, Task<UploadTask.TaskSnapshot> snapshot){
+    private void sendMessage(int messageType, String uri){
         ChatMessage chatMessage = null;
 
         switch(messageType){
@@ -324,15 +394,33 @@ public class ChatActivity extends AppCompatActivity {
                 if(message.trim().isEmpty()){
                     return;
                 }
-                chatMessage = new TextMessage(FirebaseAuth.getInstance().getUid(),"dhbxjhdgukgdzumsg",message);
+                chatMessage = new TextMessage(FirebaseAuth.getInstance().getUid(),chatUId,message);
                 break;
             case MessageType.IMAGE:
-                chatMessage = new ImageMessage(FirebaseAuth.getInstance().getUid(), "fedgjhbsjh",snapshot.getResult().getUploadSessionUri().toString());
+                chatMessage = new ImageMessage(FirebaseAuth.getInstance().getUid(), chatUId,uri);
+
                 break;
         }
-        CollectionReference messagesRef = FirebaseFirestore.getInstance().collection(DatabaseNode.MESSAGES);
+        CollectionReference messagesRef = FirebaseFirestore.getInstance().collection(DatabaseNode.MESSAGES).document(mCurrentUserId).collection(chatUId);
+        CollectionReference messagesRefOther = FirebaseFirestore.getInstance().collection(DatabaseNode.MESSAGES).document(chatUId).collection(mCurrentUserId);
         if (chatMessage != null) {
             messagesRef.add(chatMessage);
+            messagesRefOther.add(chatMessage);
+            final Map<String, Object> convers = new HashMap<>();
+            convers.put("lastMsg",chatMessage.getMessage());
+            convers.put("timestamp", chatMessage.getTime_sent());
+            OtherChatReference.collection("conversations").document(mCurrentUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    convers.put("count", Integer.valueOf(documentSnapshot.get("count").toString()) + 1);
+                }
+            });
+            convers.put("last_msg_status", chatMessage.getMessageStatus());
+            chatReference.collection("conversations").document(chatUId).update(convers);
+            OtherChatReference.collection("conversations").document(mCurrentUserId).update(convers);
+            //chatReference.collection("conversations").document(chatUId).update("lastMsg",chatMessage.getMessage());
+            //OtherChatReference.collection("conversations").document(mCurrentUserId).update("lastMsg",chatMessage.getMessage());
+            //chatItemsViewAdapter.notifyDataSetChanged();
         }
     }
 

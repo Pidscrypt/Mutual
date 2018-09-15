@@ -16,14 +16,13 @@ public class ChatMessage {
 
     private int messageType;
 
-    public ChatMessage(){}
+    ChatMessage(){}
 
-    public ChatMessage(String senderId, String receiverId, String message, int messageType) {
+    ChatMessage(String senderId, String receiverId, String message, int messageType) {
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.message = message;
         this.time_sent = new Date().getTime();
-        this.messageStatus = MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER;
         this.messageType = messageType;
     }
 
@@ -54,5 +53,9 @@ public class ChatMessage {
 
     public long getTime_recieved() {
         return time_recieved;
+    }
+
+    void setMessageStatus(int messageStatus) {
+        this.messageStatus = messageStatus;
     }
 }

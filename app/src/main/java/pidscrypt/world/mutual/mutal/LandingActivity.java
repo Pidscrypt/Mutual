@@ -1,8 +1,10 @@
 package pidscrypt.world.mutual.mutal;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.MenuItemCompat;
@@ -16,22 +18,33 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Date;
 
 import io.fabric.sdk.android.Fabric;
 import pidscrypt.world.mutual.mutal.Adapters.LandingPagerAdapter;
+import pidscrypt.world.mutual.mutal.api.DatabaseNode;
+import pidscrypt.world.mutual.mutal.api.UserStatus;
 
 public class LandingActivity extends AppCompatActivity implements ChatsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener, MutualsFragment.OnFragmentInteractionListener, InstaFragment.OnFragmentInteractionListener {
 
     private LandingPagerAdapter landingPagerAdapter;
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener firebaseAuthState;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private DocumentReference mUserDocRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
+        Fabric.with(this, new Crashlytics()); 
         setContentView(R.layout.activity_landing);
         setupWindowAnimations();
 
@@ -41,6 +54,7 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
 
         TabLayout mTabLayout = (TabLayout) findViewById(R.id.tabs);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
+
         mViewPager.setAdapter(landingPagerAdapter);
         mTabLayout.setTabsFromPagerAdapter(landingPagerAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
@@ -52,21 +66,6 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
         //mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
-
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseAuthState = new FirebaseAuth.AuthStateListener(){
-
-            @Override
-            public void onAuthStateChanged(FirebaseAuth firebaseAuth) {
-                //FireBaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if(user == null){
-                    Intent welcomeScreen = new Intent(LandingActivity.this, Welcome.class);
-                    welcomeScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(welcomeScreen);
-                }
-            }
-        };
 
     }
 
@@ -81,13 +80,37 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
     @Override
     protected void onStart() {
         super.onStart();
-        firebaseAuth.addAuthStateListener(firebaseAuthState);
+        //firebaseAuth.addAuthStateListener(firebaseAuthState);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null){
+            mUserDocRef = db.collection(DatabaseNode.USERS).document(user.getUid());
+            mUserDocRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if(task.isSuccessful()){
+                        mUserDocRef.update("online", UserStatus.ONLINE);
+                    }
+                }
+            });
+
+        }
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        firebaseAuth.addAuthStateListener(firebaseAuthState);
+        //firebaseAuth.addAuthStateListener(firebaseAuthState);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null){
+            mUserDocRef.update("online", UserStatus.OFFLINE);
+            mUserDocRef.update("last_seen", new Date().getTime());
+        }
     }
 
     @Override
@@ -133,5 +156,11 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    public static void startActivity(Context context, int flags){
+        Intent intent = new Intent(context, LandingActivity.class);
+        intent.setFlags(flags);
+        context.startActivity(intent);
     }
 }

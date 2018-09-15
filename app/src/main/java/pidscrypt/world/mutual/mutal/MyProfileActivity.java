@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,9 +53,10 @@ public class MyProfileActivity extends AppCompatActivity {
     private DocumentReference myDocRef;
     private CircleImageView myImage;
     private TextView display_name, display_status;
+    private Button btn_change_img, btn_change_status;
     private StorageReference mStorage;
     private ProgressDialog mProgress;
-    ///private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,11 +66,12 @@ public class MyProfileActivity extends AppCompatActivity {
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //mFirestore.setFirestoreSettings(settings);
 
         display_name = (TextView) findViewById(R.id.display_name);
         display_status = (TextView) findViewById(R.id.display_status);
         myImage = (CircleImageView) findViewById(R.id.my_image);
+        btn_change_img = (Button) findViewById(R.id.btn_change_img);
+        btn_change_status = (Button) findViewById(R.id.btn_change_status);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         mFirestore = FirebaseFirestore.getInstance();
@@ -103,7 +106,7 @@ public class MyProfileActivity extends AppCompatActivity {
             }
         });
 
-        myImage.setOnClickListener(new View.OnClickListener() {
+        btn_change_img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent galleryIntent = new Intent();
@@ -144,7 +147,7 @@ public class MyProfileActivity extends AppCompatActivity {
                 mProgress.setMessage("please wait while we update status!");
                 mProgress.setCanceledOnTouchOutside(false);
                 mProgress.show();
-                final StorageReference filepath = mStorage.child("profile_images").child(resultUri.getLastPathSegment());
+                final StorageReference filepath = mStorage.child(DatabaseNode.PROFIILE_IMAGES).child(resultUri.getLastPathSegment());
                 filepath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {

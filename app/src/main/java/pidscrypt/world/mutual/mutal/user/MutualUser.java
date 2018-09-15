@@ -11,21 +11,23 @@ import pidscrypt.world.mutual.mutal.api.UserStatus;
 public class MutualUser {
     private String name,
             phone,
-            image_uri,
-            status,
+            image_uri = "",
+            status = "",
             uid;
     private long last_seen;
-    private int online_status;
+    private boolean online;
 
     public MutualUser() {
     }
 
-    public MutualUser(String name, String phone, String user_id) {
+    public MutualUser(String name, String phone, String image_uri, String status, String uid, long last_seen, boolean online) {
         this.name = name;
         this.phone = phone;
-        this.uid = user_id;
-        this.last_seen = new Date().getTime();
-        this.online_status = UserStatus.ONLINE;
+        this.image_uri = image_uri;
+        this.status = status;
+        this.uid = uid;
+        this.last_seen = last_seen;
+        this.online = online;
     }
 
     public String getName() {
@@ -52,9 +54,23 @@ public class MutualUser {
         return last_seen;
     }
 
-    public int getOnline_status() {
-        return online_status;
+    public boolean isOnline() {
+        return online;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setImage_uri(String image_uri) {
+        this.image_uri = image_uri;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 }

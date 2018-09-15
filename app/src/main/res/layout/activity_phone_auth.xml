@@ -27,16 +27,20 @@
                 android:layout_marginTop="25dp"
                 android:text="Enter phone number below."
                 android:textColor="@color/colorAccent" />
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/spinnerCountries" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="15dp">
-                <Spinner
-                    android:layout_width="120dp"
+                <EditText
+                    android:layout_width="40dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/spinnerCountries" />
+                    android:id="@+id/country_code" />
 
                 <EditText
                     android:id="@+id/editTextMobile"

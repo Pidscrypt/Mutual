@@ -73,17 +73,18 @@ public class Contacts {
             final Contact cont = new Contact(
                     cursor.getString(cursor.getColumnIndex(FROM_COLUMNS[0])),
                     phone,
-                    R.drawable.avatar_contact);
+                    "");
+
 
             //@TODO: check firebase for contact exists
-            Query usersQuery = users.whereEqualTo("phone",phone);
+            /*Query usersQuery = users.whereEqualTo("phone",phone);
             usersQuery.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    String obj = queryDocumentSnapshots.getDocuments().get(0).get("image_uri").toString();
-                    cont.setImage_uri(obj);
+                    //String obj = queryDocumentSnapshots.getDocuments().get(0).get("image_uri").toString();
+                    //cont.setImage_uri(obj);
                 }
-            });
+            });*/
             list.add(cont);
 
             eraser.add(phone);

@@ -52,7 +52,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
         setContentView(R.layout.activity_verify_phone);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+//        actionBar.hide();
 
         //initializing objects
         mAuth = FirebaseAuth.getInstance();

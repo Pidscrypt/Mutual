@@ -3,6 +3,7 @@ package pidscrypt.world.mutual.mutal.Adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,11 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.List;
 
@@ -22,61 +28,80 @@ import pidscrypt.world.mutual.mutal.ChatActivity;
 import pidscrypt.world.mutual.mutal.MyProfileActivity;
 import pidscrypt.world.mutual.mutal.R;
 import pidscrypt.world.mutual.mutal.api.Contact;
+import pidscrypt.world.mutual.mutal.user.MutualUser;
 
-public class ContactsViewAdapter extends RecyclerView.Adapter<ContactsViewAdapter.ContactsViewHolder> {
+public class ContactsViewAdapter extends FirestoreRecyclerAdapter<MutualUser,ContactsViewAdapter.ContactsViewHolder> {
 
     private List<Contact> contacts_list;
     private Context mContext;
+    private FirebaseUser uid = FirebaseAuth.getInstance().getCurrentUser();
 
-    public ContactsViewAdapter(List<Contact> contact_items, Context mContext) {
-        this.contacts_list = contact_items;
+    /**
+     * Create a new RecyclerView adapter that listens to a Firestore Query.  See {@link
+     * FirestoreRecyclerOptions} for configuration options.
+     *
+     * @param options
+     */
+    public ContactsViewAdapter(@NonNull FirestoreRecyclerOptions<MutualUser> options, Context mContext) {
+        super(options);
         this.mContext = mContext;
     }
 
     @Override
-    public ContactsViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        View view = inflater.inflate(R.layout.contact_list_item,viewGroup,false);
-        ContactsViewHolder chatsViewHolder = new ContactsViewHolder(view);
-        return chatsViewHolder;
-    }
+    protected void onBindViewHolder(@NonNull final ContactsViewHolder holder, int position, @NonNull final MutualUser model) {
+        if(!model.getUId().equals(uid.getUid())){
+            holder.contact_name.setText(model.getName());
+            holder.contact_tag.setText(model.getPhone());
+            if(model.getImage_uri().trim().isEmpty()){
+                holder.contact_img.setImageResource(R.drawable.avatar_contact);
+            }else{
 
-    @Override
-    public void onBindViewHolder(final ContactsViewHolder chatsViewHolder, int i) {
-        chatsViewHolder.contact_name.setText(contacts_list.get(i).getName());
-        chatsViewHolder.contact_tag.setText(contacts_list.get(i).getTag());
-        if(contacts_list.get(i).getImage_uri().isEmpty()){
-            chatsViewHolder.contact_img.setImageResource(contacts_list.get(i).getImg());
-        }else{
+                RequestOptions requestOptions = new RequestOptions()
+                        .placeholder(R.drawable.avatar_contact)
+                        .error(R.drawable.avatar_contact)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL);
 
-            RequestOptions requestOptions = new RequestOptions()
-                    .placeholder(R.drawable.avatar_contact)
-                    .error(R.drawable.bg_outline_gray)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL);
+                Glide.with(mContext).setDefaultRequestOptions(requestOptions).load(model.getImage_uri()).thumbnail(0.5f).into(holder.contact_img);
+            }
 
-            Glide.with(mContext).setDefaultRequestOptions(requestOptions).load(contacts_list.get(i).getImage_uri()).thumbnail(0.5f).into(chatsViewHolder.contact_img);
-        }
-
-        chatsViewHolder.contact.setOnClickListener(new View.OnClickListener() {
+        holder.contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent chat_intent = new Intent(mContext, ChatActivity.class);
                 Bundle b = new Bundle();
-                b.putString("chat_name",chatsViewHolder.contact_name.getText().toString());
-                b.putString("chat_phone",chatsViewHolder.contact_tag.getText().toString());
+                b.putString("chat_name",model.getName());
+                b.putString("chat_phone",model.getPhone());
+                b.putString("last_seen", String.valueOf(model.getLast_seen()));
+                b.putString("image_uri", model.getImage_uri());
+                b.putString("uid",model.getUId());
+                b.putBoolean("isOnline", model.isOnline());
                 b.putBoolean("from_contacts",true);
                 chat_intent.putExtra("chat_details",b);
                 mContext.startActivity(chat_intent);
             }
         });
+        }
+
+    }
+
+    @NonNull
+    @Override
+    public ContactsViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.contact_list_item,viewGroup,false);
+        return new ContactsViewHolder(view);
     }
 
     @Override
-    public int getItemCount() {
-        return contacts_list.size();
+    public void onError(@NonNull FirebaseFirestoreException e) {
+        super.onError(e);
     }
 
-    class ContactsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    @Override
+    public void onDataChanged() {
+        super.onDataChanged();
+    }
+
+    public static class ContactsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView contact_name, contact_tag;
         ImageView contact_img;

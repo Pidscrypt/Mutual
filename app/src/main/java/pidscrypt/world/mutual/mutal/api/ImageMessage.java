@@ -11,5 +11,6 @@ public class ImageMessage extends ChatMessage {
 
     public ImageMessage(String senderId, String receiverId, String imageUri) {
         super(senderId, receiverId, imageUri, MessageType.IMAGE);
+        setMessageStatus(MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER_ONMEDIA);
     }
 }

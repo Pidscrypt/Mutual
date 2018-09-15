@@ -1,5 +1,6 @@
 package pidscrypt.world.mutual.mutal;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,14 +27,13 @@ public class PhoneAuthActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_phone_auth);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+        /*ActionBar actionBar = getSupportActionBar();
+        actionBar.hide();*/
 
         spinner = findViewById(R.id.spinnerCountries);
         spinner.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item, CountryData.countryNames));
 
         editTextMobile = (EditText) findViewById(R.id.editTextMobile);
-        startAnimation();
 
         findViewById(R.id.buttonContinue).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,6 +46,7 @@ public class PhoneAuthActivity extends AppCompatActivity {
                     editTextMobile.requestFocus();
                     return;
                 }
+
                 if(mobile.startsWith("0")){
                     mobile = mobile.substring(1,mobile.length());
                 }
@@ -77,5 +78,17 @@ public class PhoneAuthActivity extends AppCompatActivity {
         editTextMobile.startAnimation(anim);
 
     }
+
+    public static void startIntent(Context context){
+        Intent intent = new Intent(context, PhoneAuthActivity.class);
+        context.startActivity(intent);
+    }
+
+    public static void startIntent(Context context, int flags){
+        Intent intent = new Intent(context, PhoneAuthActivity.class);
+        intent.setFlags(flags);
+        context.startActivity(intent);
+    }
+
 
 }

@@ -73,6 +73,8 @@ dependencies {
     api 'com.firebaseui:firebase-ui-auth:3.3.1'
     api 'com.firebaseui:firebase-ui-firestore:3.3.1'
     api 'com.firebaseui:firebase-ui:3.3.1'
+    implementation 'id.zelory:compressor:2.1.0'
+    api 'com.nightonke:boommenu:2.1.1'
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.7.0'
     implementation('com.crashlytics.sdk.android:crashlytics:2.9.4@aar') {
         transitive = true;
