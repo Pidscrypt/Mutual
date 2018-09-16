@@ -152,7 +152,7 @@ public class ChatActivity extends AppCompatActivity {
             Bundle b = bundle.getBundle("chat_details");
             name_chat.setText(b.getString("chat_name"));
             MutualDateFormat timeAgo = new MutualDateFormat();
-            final String last_seen = timeAgo.getTimeAgo(Long.valueOf(b.getString("last_seen")), getApplicationContext());
+            //final String last_seen = timeAgo.getTimeAgo(Long.valueOf(b.getString("last_seen")), getApplicationContext());
 
             //lastSeen.setText(b.getBoolean("isOnline")?"online":last_seen);
             chatUId = b.getString("uid");
@@ -165,7 +165,7 @@ public class ChatActivity extends AppCompatActivity {
                     //MutualDateFormat mTimeAgo = new MutualDateFormat();
                     long lastTime = Long.parseLong(documentSnapshot.get("last_seen").toString());
                     String lastSeenTime = MutualDateFormat.getTimeAgo(lastTime, getApplicationContext());
-                    lastSeen.setText(lastSeenTime);
+                    lastSeen.setText(documentSnapshot.getBoolean("online") ?"online":lastSeenTime);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -193,7 +193,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if(!documentSnapshot.exists()){
-                    final Conversation shared = new Conversation(false, new Date().getTime(), chatImageUri, null);
+                    final Conversation shared = new Conversation(false, new Date().getTime(), chatImageUri);
                     //mine.setLastMsg("chat set at me");
                     //mine.setTimestamp(new Date().getTime());
 
@@ -201,8 +201,9 @@ public class ChatActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             MutualUser user = documentSnapshot.toObject(MutualUser.class);
-                            final Conversation mine = new Conversation(shared.isSeen(), shared.getStart_date(), chatImageUri, user);
-                            mine.setWith(documentSnapshot.getString("phone"));
+                            final Conversation mine = new Conversation(shared.isSeen(), shared.getStart_date(), chatImageUri);
+                            mine.setWith(user.getPhone());
+                            mine.setUid(user.getUId());
                             chatReference.collection("conversations").document(chatUId).set(mine);
                         }
                     });
@@ -211,10 +212,11 @@ public class ChatActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             MutualUser user = documentSnapshot.toObject(MutualUser.class);
-                            final Conversation others = new Conversation(shared.isSeen(), shared.getStart_date(), documentSnapshot.getString("image_uri"), user);
+                            final Conversation others = new Conversation(shared.isSeen(), shared.getStart_date(), documentSnapshot.getString("image_uri"));
                             //others.setLastMsg("chat set at other");
                             //others.setTimestamp(mine.getTimestamp());
-                            others.setWith(chatPhone);
+                            others.setWith(user.getPhone());
+                            others.setUid(user.getUId());
                             OtherChatReference.collection("conversations").document(mCurrentUserId).set(others);
                         }
                     });

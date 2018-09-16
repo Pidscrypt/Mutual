@@ -1,12 +1,39 @@
 package pidscrypt.world.mutual.mutal;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Toast;
+
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import java.util.List;
+
+import pidscrypt.world.mutual.mutal.Adapters.ContactsViewAdapter;
+import pidscrypt.world.mutual.mutal.Adapters.MutualsViewAdapter;
+import pidscrypt.world.mutual.mutal.api.Contact;
+import pidscrypt.world.mutual.mutal.api.DatabaseNode;
+import pidscrypt.world.mutual.mutal.services.Contacts;
+import pidscrypt.world.mutual.mutal.user.MutualUser;
 
 
 /**
@@ -14,81 +41,132 @@ import android.view.ViewGroup;
  * Activities that contain this fragment must implement the
  * {@link MutualsFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link MutualsFragment#newInstance} factory method to
+ * Use the {@link MutualsFragment} factory method to
  * create an instance of this fragment.
  */
-public class MutualsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class MutualsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnClickListener {
+    private RecyclerView contacts_recycler;
+    private List<Contact> contacts_list;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference userRef;
+    private MutualsViewAdapter contactsViewAdapter;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-
-    public MutualsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ContactsFragment.
+    /*
+     * Defines an array that contains resource ids for the layout views
+     * that get the Cursor column contents. The id is pre-defined in
+     * the Android framework, so it is prefaced with "android.R.id"
      */
-    // TODO: Rename and change types and number of parameters
-    public static MutualsFragment newInstance(String param1, String param2) {
-        MutualsFragment fragment = new MutualsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    private final static int[] TO_IDS = {
+            android.R.id.text1
+    };
+    // Define variables for the contact the user selects
+    // The contact's _ID value
+    long mContactId;
+    // The contact's LOOKUP_KEY
+    String mContactKey;
+    // A content URI for the selected contact
+    Uri mContactUri;
+    // An adapter that binds the result Cursor to the ListView
+    private SimpleCursorAdapter mCursorAdapter;
+
+    // The column index for the _ID column
+    private static final int CONTACT_ID_INDEX = 0;
+    // The column index for the LOOKUP_KEY column
+    private static final int LOOKUP_KEY_INDEX = 1;
+
+    // Defines the text expression
+    @SuppressLint("InlinedApi")
+    private static final String SELECTION =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ?
+                    ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " LIKE ?" :
+                    ContactsContract.Contacts.DISPLAY_NAME + " LIKE ?";
+    // Defines a variable for the search string
+    private String mSearchString;
+    // Defines the array to hold values that replace the ?
+    private String[] mSelectionArgs = { mSearchString };
+
+    private Contacts mContacts;
+
+    public MutualsFragment(){
+
     }
+
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_contacts, container, false);
+        View layout = inflater.inflate(R.layout.fragment_contacts, container, false);
+        contacts_recycler = layout.findViewById(R.id.contacts_recycler_view);
+        userRef = db.collection(DatabaseNode.USERS);
+
+        mContacts = new Contacts(getContext());
+
+        /*ContactsViewAdapter contactsViewAdapter = new ContactsViewAdapter(mContacts.fetch(),getContext());
+        contacts_recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        contacts_recycler.setAdapter(contactsViewAdapter);*/
+
+        setupContacts(layout);
+
+        //contacts_recycler.setOnClickListener(this);
+
+        return layout;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+    @SuppressLint("SetTextI18n")
+    private void setupContacts(View view){
+        Query query = userRef;
+
+        FirestoreRecyclerOptions<MutualUser> options = new FirestoreRecyclerOptions.Builder<MutualUser>().setQuery(query,MutualUser.class).build();
+
+        contactsViewAdapter = new MutualsViewAdapter(options, getContext());
+
+        final RecyclerView contactsRecycler = view.findViewById(R.id.contacts_recycler_view);
+        contactsRecycler.setHasFixedSize(true);
+
+        contactsRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        contactsRecycler.setAdapter(contactsViewAdapter);
+
+
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+    public void onStart() {
+        super.onStart();
+        contactsViewAdapter.startListening();
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    public void onStop() {
+        super.onStop();
+        contactsViewAdapter.stopListening();
+    }
+
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, @Nullable Bundle bundle) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
+    }
+
+    @Override
+    public void onClick(View view) {
+        Toast.makeText(getContext(),"contact pressed",Toast.LENGTH_SHORT).show();
     }
 
     /**

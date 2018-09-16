@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -27,7 +28,8 @@ import pidscrypt.world.mutual.mutal.user.MutualUser;
 public class Contacts {
 
     private Context mContext;
-    private CollectionReference users = FirebaseFirestore.getInstance().collection(DatabaseNode.USERS);
+    private CollectionReference contactsRef = FirebaseFirestore.getInstance().collection(DatabaseNode.CONTACTS);
+    private List<Contact> mutualContacts, noneMutualContacts;
 
     /*
      * Defines an array that contains column names to move from
@@ -48,9 +50,14 @@ public class Contacts {
         this.mContext = mContext;
     }
 
-    public List<Contact> fetch(){
+    public List<Contact> fetchNoneMutualContacts(){
+        return noneMutualContacts;
+    }
 
-        List<Contact> list = new ArrayList<>();
+    public List<Contact> fetchMutualContacts(){
+
+        mutualContacts = new ArrayList<>();
+        noneMutualContacts = new ArrayList<>();
         List<String> eraser = new ArrayList<>();
 
         // cursor get all contacts in the phone
@@ -77,19 +84,21 @@ public class Contacts {
 
 
             //@TODO: check firebase for contact exists
-            /*Query usersQuery = users.whereEqualTo("phone",phone);
-            usersQuery.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            contactsRef.document(cont.getNumber()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    //String obj = queryDocumentSnapshots.getDocuments().get(0).get("image_uri").toString();
-                    //cont.setImage_uri(obj);
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if(documentSnapshot.exists()){
+                        mutualContacts.add(cont);
+                    }else{
+                        noneMutualContacts.add(cont);
+                    }
                 }
-            });*/
-            list.add(cont);
+            });
+
 
             eraser.add(phone);
         }
 
-        return list;
+        return mutualContacts;
     }
     }

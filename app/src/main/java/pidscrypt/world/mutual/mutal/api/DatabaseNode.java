@@ -8,4 +8,5 @@ public class DatabaseNode {
     public static final String PROFIILE_IMAGES = "profile_images";
     public static final String THUMBNAILS = "thumbs";
     public static final String FEEDS = "feeds";
+    public static final String CONTACTS = "contacts";
 }

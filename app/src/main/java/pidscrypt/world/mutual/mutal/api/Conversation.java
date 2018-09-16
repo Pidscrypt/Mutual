@@ -11,21 +11,24 @@ public class Conversation {
     private int last_msg_status;
     private int count = 0;
     private String with;
-    private MutualUser user;
+    private String uid;
 
     public Conversation() {
     }
 
-    public Conversation(boolean seen, long start_date, String img_uri, MutualUser user) {
+    public Conversation(boolean seen, long start_date, String img_uri) {
         this.seen = seen;
         this.start_date = start_date;
         this.img_uri = img_uri;
         this.last_msg_status = MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER;
-        this.user = user;
     }
 
-    public MutualUser getUser() {
-        return user;
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getWith() {

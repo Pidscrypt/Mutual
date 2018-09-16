@@ -122,14 +122,7 @@ public class ChatAdapter extends FirestoreRecyclerAdapter<Conversation,ChatAdapt
                 b.putString("chat_name",holder.name.getText().toString());
                 b.putString("chat_phone",model.getWith());
                 b.putString("image_uri", model.getImg_uri());
-                try {
-                    user = new JSONObject(model.getUser().toString());
-                    b.putString("uid",user.getString("uid"));
-                    Toast.makeText(mContext, user.toString(), Toast.LENGTH_LONG).show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
+                b.putString("uid",model.getUid());
                 b.putBoolean("from_contacts",true);
                 chat_intent.putExtra("chat_details",b);
                 mContext.startActivity(chat_intent);
