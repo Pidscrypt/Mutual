@@ -3,6 +3,7 @@ package pidscrypt.world.mutual.mutal;
 import android.animation.TimeInterpolator;
 import android.annotation.SuppressLint;
 import android.content.ClipData;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -16,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -52,15 +54,22 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentListenOptions;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.nightonke.boommenu.BoomButtons.BoomButton;
+import com.nightonke.boommenu.BoomButtons.SimpleCircleButton;
+import com.nightonke.boommenu.BoomMenuButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +83,7 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import pidscrypt.world.mutual.mutal.Adapters.ChatMessagesViewAdapter;
+import pidscrypt.world.mutual.mutal.api.AudioMessage;
 import pidscrypt.world.mutual.mutal.api.Chat;
 import pidscrypt.world.mutual.mutal.api.ChatMessage;
 import pidscrypt.world.mutual.mutal.api.Conversation;
@@ -93,7 +103,7 @@ public class ChatActivity extends AppCompatActivity {
     private TextInputEditText text_msg;
     private static final int ANIM_DURATION = 500;
     private TextView name_chat, lastSeen;
-    private ImageView send_message_btn, send_audio_btn;
+    private ImageView send_message_btn, send_audio_btn, stop_audio_btn;
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference messageRefInChat;
@@ -103,13 +113,16 @@ public class ChatActivity extends AppCompatActivity {
     private Animation anim;
     private Audio mAudioPlayer;
     private ChatMessagesViewAdapter chatItemsViewAdapter;
+    RecyclerView chat_messages_recycler;
     private ImageView open_cam_btn;
+    private BoomMenuButton open_attachments;
     private StorageReference mStorage;
     private String chatUId = "";
     private String mCurrentUserId;
     private String chatImageUri = "";
     private String chatPhone = "";
     private FirebaseAuth firebaseAuth;
+    private boolean recording = false;
     //private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
 
     String mCurrentPhotoPath;
@@ -133,10 +146,12 @@ public class ChatActivity extends AppCompatActivity {
         name_chat = (TextView) findViewById(R.id.name_chat);
         send_message_btn = (ImageView) findViewById(R.id.send_message_btn);
         send_audio_btn = (ImageView) findViewById(R.id.send_audio_btn);
+        stop_audio_btn = (ImageView) findViewById(R.id.stop_audio_btn);
         lastSeen = (TextView) findViewById(R.id.lastSeen);
 
         open_cam_btn = (ImageView) findViewById(R.id.open_cam_btn);
         user_img = (CircleImageView) findViewById(R.id.user_img);
+        open_attachments = (BoomMenuButton) findViewById(R.id.attach_file_btn);
 
         mStorage = FirebaseStorage.getInstance().getReference();
         mCurrentUserId = firebaseAuth.getInstance().getUid();
@@ -174,7 +189,25 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
             //lastSeen.setText(?"online":last_seen);
+
+            usersRef.document(chatUId).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                    if(e != null){
+                        lastSeen.setText("");
+                    }
+                    if(!documentSnapshot.getBoolean("online")){
+                        String lastSeenTime = MutualDateFormat.getTimeAgo(Long.parseLong(documentSnapshot.get("last_seen").toString()), getApplicationContext());
+                        lastSeen.setText(lastSeenTime);
+                    }else{
+                        lastSeen.setText("online");
+                    }
+
+                }
+            });
+
             chatPhone = b.getString("chat_phone");
+
 
             if(!b.getString("image_uri").trim().isEmpty()){
                 RequestOptions requestOptions = new RequestOptions()
@@ -272,6 +305,89 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        send_audio_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
+                builder.setMessage("Start recording?");
+                builder.setCancelable(true);
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+
+                builder.setPositiveButton("Start", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mAudioPlayer = new Audio();
+                        mAudioPlayer.startRecording();
+                        stop_audio_btn.setVisibility(View.VISIBLE);
+                        recording = true;
+                        dialogInterface.cancel();
+                    }
+                });
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }
+        });
+
+        stop_audio_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                final AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
+                builder.setMessage("Stop recording?");
+                builder.setCancelable(true);
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+
+                builder.setPositiveButton("Stop", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialogInterface, int i) {
+                        mAudioPlayer.stopRecording();
+                        stop_audio_btn.setVisibility(View.INVISIBLE);
+                        recording = false;
+                        final StorageReference filepath = mStorage.child(DatabaseNode.RECORDINGS).child(mAudioPlayer.getFileUri().getLastPathSegment());
+                        filepath.putFile(mAudioPlayer.getFileUri()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                if(task.isSuccessful()){
+                                    filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            sendMessage(MessageType.AUDIO, uri.toString());
+                                            dialogInterface.cancel();
+                                        }
+                                    });
+
+                                }else{
+                                    Toast.makeText(ChatActivity.this,"upload failed",Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+
+                    }
+                });
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }
+        });
+
+
+        for (int i = 0; i < open_attachments.getPiecePlaceEnum().pieceNumber(); i++) {
+            SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder()
+                    .normalImageRes(R.drawable.avatar_contact);
+            open_attachments.addBuilder(builder);
+        }
+/*
         send_audio_btn.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -280,21 +396,39 @@ public class ChatActivity extends AppCompatActivity {
                     case MotionEvent.ACTION_DOWN:
                         anim = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.scaleout);
                         anim.setInterpolator(new OvershootInterpolator());
-                        send_audio_btn.startAnimation(anim);
+                        //send_audio_btn.startAnimation(anim);
 
                         mAudioPlayer = new Audio();
                         mAudioPlayer.startRecording();
                         break;
                     case MotionEvent.ACTION_UP:
                         mAudioPlayer.stopRecording();
-                        mAudioPlayer.fileExists();
+                        //mAudioPlayer.fileExists();
 
+                        final StorageReference filepath = mStorage.child(DatabaseNode.RECORDINGS).child(mAudioPlayer.getFileUri().getLastPathSegment());
+                        filepath.putFile(mAudioPlayer.getFileUri()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                if(task.isSuccessful()){
+                                    filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            sendMessage(MessageType.AUDIO, uri.toString());
+                                        }
+                                    });
+
+                                }else{
+                                    Toast.makeText(ChatActivity.this,"upload failed",Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
                         //@TODO: send audio message
+                        //sendMessage(MessageType.AUDIO,  mAudioPlayer.MediaLocation());
                         break;
                     case MotionEvent.ACTION_MOVE:
                         /*if(MotionEvent.obtain(200,2000,MotionEvent.ACTION_UP,0,30)){
 
-                        }*/
+                        }*
 
                         //@TODO: Listen for moving finger on screen to terminate recording ...
                         break;
@@ -303,7 +437,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 return false;
             }
-        });
+        });*/
 
         open_cam_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -381,7 +515,7 @@ public class ChatActivity extends AppCompatActivity {
         FirestoreRecyclerOptions<ChatMessage> options = new FirestoreRecyclerOptions.Builder<ChatMessage>().setQuery(query,ChatMessage.class).build();
 
         chatItemsViewAdapter = new ChatMessagesViewAdapter(options,ChatActivity.this);
-        final RecyclerView chat_messages_recycler = (RecyclerView) findViewById(R.id.chat_messages);
+        chat_messages_recycler = (RecyclerView) findViewById(R.id.chat_messages);
         chat_messages_recycler.setHasFixedSize(true);
         chat_messages_recycler.setLayoutManager(new LinearLayoutManager(this));
         chat_messages_recycler.setAdapter(chatItemsViewAdapter);
@@ -400,8 +534,9 @@ public class ChatActivity extends AppCompatActivity {
                 break;
             case MessageType.IMAGE:
                 chatMessage = new ImageMessage(FirebaseAuth.getInstance().getUid(), chatUId,uri);
-
                 break;
+            case MessageType.AUDIO:
+                chatMessage = new AudioMessage(FirebaseAuth.getInstance().getUid(), chatUId, uri);
         }
         CollectionReference messagesRef = FirebaseFirestore.getInstance().collection(DatabaseNode.MESSAGES).document(mCurrentUserId).collection(chatUId);
         CollectionReference messagesRefOther = FirebaseFirestore.getInstance().collection(DatabaseNode.MESSAGES).document(chatUId).collection(mCurrentUserId);
@@ -423,6 +558,7 @@ public class ChatActivity extends AppCompatActivity {
             //chatReference.collection("conversations").document(chatUId).update("lastMsg",chatMessage.getMessage());
             //OtherChatReference.collection("conversations").document(mCurrentUserId).update("lastMsg",chatMessage.getMessage());
             //chatItemsViewAdapter.notifyDataSetChanged();
+
         }
     }
 

@@ -122,16 +122,18 @@
                 android:background="@color/colorPrimary"
                 android:hint="@string/message_tet_placeholder"
                 tools:ignore="NestedWeights" />
-            <ImageView
+            <com.nightonke.boommenu.BoomMenuButton
                 android:layout_width="wrap_content"
-                android:layout_height="24dp"
+                android:layout_height="wrap_content"
                 android:id="@+id/attach_file_btn"
                 android:layout_gravity="center_vertical"
                 android:baselineAlignBottom="true"
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="4dp"
                 android:tint="#000"
-                app:srcCompat="@drawable/ic_action_attach"/>
+                app:bmb_buttonEnum="simpleCircle"
+                app:bmb_piecePlaceEnum="piecePlace_dot_6_1"
+                app:bmb_buttonPlaceEnum="buttonPlace_sc_6_1"/>
             <ImageView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -171,6 +173,19 @@
                 android:visibility="gone"
                 android:background="@drawable/ic_send_btn"
                 app:srcCompat="@drawable/ic_send_white_24dp"/>
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:id="@+id/stop_audio_btn"
+                android:padding="8dp"
+                android:layout_gravity="end"
+                android:baselineAlignBottom="true"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:background="@drawable/ic_send_btn"
+                app:srcCompat="@drawable/ic_add_white_24dp"/>
         </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

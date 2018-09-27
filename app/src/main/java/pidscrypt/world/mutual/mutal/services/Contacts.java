@@ -17,6 +17,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,11 +51,7 @@ public class Contacts {
         this.mContext = mContext;
     }
 
-    public List<Contact> fetchNoneMutualContacts(){
-        return noneMutualContacts;
-    }
-
-    public List<Contact> fetchMutualContacts(){
+    public List<Contact> fetctContacts(){
 
         mutualContacts = new ArrayList<>();
         noneMutualContacts = new ArrayList<>();
@@ -82,14 +79,16 @@ public class Contacts {
                     phone,
                     "");
 
-
             //@TODO: check firebase for contact exists
             contactsRef.document(cont.getNumber()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     if(documentSnapshot.exists()){
+                        cont.setMutual(1);
                         mutualContacts.add(cont);
                     }else{
+                        cont.setMutual(2);
+
                         noneMutualContacts.add(cont);
                     }
                 }
@@ -98,6 +97,10 @@ public class Contacts {
 
             eraser.add(phone);
         }
+        Contact c = new Contact("fake","43789734", "");
+        c.setMutual(3);
+        mutualContacts.add(c);
+        mutualContacts.addAll(noneMutualContacts);
 
         return mutualContacts;
     }

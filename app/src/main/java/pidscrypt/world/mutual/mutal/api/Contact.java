@@ -8,11 +8,20 @@ public class Contact {
         private int img;
         private String tag;
         private String image_uri;
+        private int isMutual = 1;
 
-    public Contact(String name, String tag, String image_uri) {
+    public Contact(String name, String number, String image_uri) {
         this.name = name;
-        this.tag = tag;
+        this.number = number;
         this.image_uri = image_uri;
+    }
+
+    public void setMutual(int mutual) {
+        this.isMutual = mutual;
+    }
+
+    public int isMutual() {
+        return isMutual;
     }
 
     public String getName() {

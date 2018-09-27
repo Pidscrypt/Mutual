@@ -196,4 +196,5 @@
     <string name="display_status">Hi! Look, am using Mutual chat!</string>
     <string name="change_image">change image</string>
     <string name="change_status">change status</string>
+    <string name="invite_a_friend">Invite a friend.</string>
 </resources>

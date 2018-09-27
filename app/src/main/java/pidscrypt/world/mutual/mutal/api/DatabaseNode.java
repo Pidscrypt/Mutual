@@ -9,4 +9,5 @@ public class DatabaseNode {
     public static final String THUMBNAILS = "thumbs";
     public static final String FEEDS = "feeds";
     public static final String CONTACTS = "contacts";
+    public static final String RECORDINGS = "recordings";
 }

@@ -40,6 +40,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
 
 
     private RecyclerView contacts_recycler;
+    private RecyclerView contacts_recycler_none_mutual;
     private List<Contact> contacts_list;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference userRef;
@@ -98,15 +99,22 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         // Inflate the layout for this fragment
         View layout = inflater.inflate(R.layout.fragment_contacts, container, false);
         contacts_recycler = layout.findViewById(R.id.contacts_recycler_view);
+
         userRef = db.collection(DatabaseNode.USERS);
 
         mContacts = new Contacts(getContext());
 
-        /*ContactsViewAdapter contactsViewAdapter = new ContactsViewAdapter(mContacts.fetch(),getContext());
+        ContactsViewAdapter contactsViewAdapter = new ContactsViewAdapter(mContacts,getContext());
+        contacts_recycler.setHasFixedSize(true);
         contacts_recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        contacts_recycler.setAdapter(contactsViewAdapter);*/
+        contacts_recycler.setAdapter(contactsViewAdapter);
 
-        setupContacts(layout);
+        /*ContactsViewAdapter contactsViewAdapterNoneMutual = new ContactsViewAdapter(mContacts.fetchNoneMutualContacts(),getContext(), false);
+        contacts_recycler_none_mutual.setHasFixedSize(true);
+        contacts_recycler_none_mutual.setLayoutManager(new LinearLayoutManager(getActivity()));
+        contacts_recycler_none_mutual.setAdapter(contactsViewAdapterNoneMutual);*/
+
+        //setupContacts(layout);
 
         //contacts_recycler.setOnClickListener(this);
 
@@ -115,31 +123,15 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
 
     @SuppressLint("SetTextI18n")
     private void setupContacts(View view){
-        Query query = userRef;
-
-        FirestoreRecyclerOptions<MutualUser> options = new FirestoreRecyclerOptions.Builder<MutualUser>().setQuery(query,MutualUser.class).build();
-
-        contactsViewAdapter = new ContactsViewAdapter(options, getContext());
+        /*contactsViewAdapter = new ContactsViewAdapter(getContext());
 
         final RecyclerView contactsRecycler = view.findViewById(R.id.contacts_recycler_view);
         contactsRecycler.setHasFixedSize(true);
 
         contactsRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        contactsRecycler.setAdapter(contactsViewAdapter);
+        contactsRecycler.setAdapter(contactsViewAdapter);*/
 
 
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        contactsViewAdapter.startListening();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        contactsViewAdapter.stopListening();
     }
 
     @NonNull

@@ -59,6 +59,9 @@ public class ChatMessagesViewAdapter extends FirestoreRecyclerAdapter<ChatMessag
                 case MessageType.IMAGE:
                     configureSentImageViewHolder((ChatImageOutgoingViewHolder) holder, position, model);
                     break;
+                case MessageType.AUDIO:
+                    configureSentAudioViewHolder((ChatAudioIncomingViewHolder) holder, position, model);
+                    break;
             }
 
         }else{
@@ -73,6 +76,7 @@ public class ChatMessagesViewAdapter extends FirestoreRecyclerAdapter<ChatMessag
 
         }
     }
+
 
     @NonNull
     @Override
@@ -98,11 +102,22 @@ public class ChatMessagesViewAdapter extends FirestoreRecyclerAdapter<ChatMessag
                 View viewImageOut = layoutInflater.inflate(R.layout.item_image_messsage_outgoing, viewGroup, false);
                 viewHolder = new ChatImageOutgoingViewHolder(viewImageOut);
                 break;
+            case MutualMessageViewTypes.AUDIO_MESSAGE_OUTGOING:
+                View viewAudioOut = layoutInflater.inflate(R.layout.item_audio_messsage_outgoing, viewGroup, false);
+                viewHolder = new ChatAudioIncomingViewHolder(viewAudioOut);
+                break;
         }
         return viewHolder;
         //return new ChatMessageViewHolder(view);
     }
 
+    @Override
+    public void onDataChanged() {
+        super.onDataChanged();
+        if (this.getItemCount() > 1) {
+            //mContext.getLayoutManager().smoothScrollToPosition(chat_messages_recycler, null, this.getItemCount() - 1);
+        }
+    }
 
     @Override
     public int getItemViewType(int position) {
@@ -114,6 +129,10 @@ public class ChatMessagesViewAdapter extends FirestoreRecyclerAdapter<ChatMessag
                     break;
                 case MessageType.IMAGE:
                     type = MutualMessageViewTypes.IMAGE_MESSAGE_OUTGOING;
+                    break;
+                case MessageType.AUDIO:
+                    type = MutualMessageViewTypes.AUDIO_MESSAGE_OUTGOING;
+                    break;
             }
         } else {
             switch (getItem(position).getMessageType()){
@@ -122,12 +141,19 @@ public class ChatMessagesViewAdapter extends FirestoreRecyclerAdapter<ChatMessag
                      break;
                 case MessageType.IMAGE:
                      type = MutualMessageViewTypes.IMAGE_MESSAGE_INCOMING;
+                     break;
+                case MessageType.AUDIO:
+                    type = MutualMessageViewTypes.AUDIO_MESSAGE_INCOMING;
+                    break;
             }
         }
         return type;
     }
 
 
+    private void configureSentAudioViewHolder(ChatAudioIncomingViewHolder holder, int position, ChatMessage model) {
+
+    }
 
     private void configureRecievedMessageViewHolder(OtherChatMessageViewHolder holder, int position, @NonNull ChatMessage model){
         holder.messageTime.setText(DateFormat.format(MutualDateFormat.SHORT,model.getTime_sent()));
@@ -282,6 +308,21 @@ public class ChatMessagesViewAdapter extends FirestoreRecyclerAdapter<ChatMessag
 
             messageTime = (TextView) itemView.findViewById(R.id.message_time);
             message = (ImageView) itemView.findViewById(R.id.message);
+
+        }
+
+    }
+
+
+    class ChatAudioIncomingViewHolder extends RecyclerView.ViewHolder {
+
+        ImageView message;
+        TextView messageTime;
+
+        ChatAudioIncomingViewHolder(View itemView) {
+            super(itemView);
+
+            messageTime = (TextView) itemView.findViewById(R.id.message_time);
 
         }
 

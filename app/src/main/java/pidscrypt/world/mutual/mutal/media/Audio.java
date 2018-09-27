@@ -1,6 +1,7 @@
 package pidscrypt.world.mutual.mutal.media;
 
 import android.media.MediaRecorder;
+import android.net.Uri;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,17 +15,31 @@ public class Audio {
     private MediaRecorder mediaRecorder;
     private String mediaLocation = null;
     private String mediaName = null;
+    private String fileName;
+    private File file;
+
+    public File getFile() {
+        return file;
+    }
 
     public String MediaLocation() {
         return this.mediaLocation;
     }
 
+    public String getMediaName() {
+        return mediaName;
+    }
+
+    public Uri getFileUri(){
+        return Uri.fromFile(getFile());
+    }
 
     public Audio(){
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         mediaName = "/AUD_"+timeStamp+".m4a";
         try {
             mediaLocation = createAudioFile(this.mediaName).getAbsolutePath();
+            //fileName = android.os.Environment.getExternalStorageDirectory().getAbsolutePath()+mediaName;
         }catch (Exception o){}
     }
 
@@ -32,7 +47,7 @@ public class Audio {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mediaRecorder.setOutputFile(mediaLocation);
+        mediaRecorder.setOutputFile(MediaLocation());
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try{
@@ -61,9 +76,10 @@ public class Audio {
 
         if (!cacheDir.exists())
             cacheDir.mkdirs();
-        File image = new File(cacheDir + "/" + imageFileName);
+        file  = new File(cacheDir + "/" + imageFileName);
 
-        return image;
+
+        return file;
     }
 
     public boolean fileExists(){
