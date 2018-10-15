@@ -2,7 +2,9 @@ package pidscrypt.world.mutual.mutal;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -13,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,8 +45,9 @@ public class VerifyPhoneActivity extends AppCompatActivity {
 
     //firebase auth object
     private FirebaseAuth mAuth;
-    private TextView timer;
+    private TextView tv_timer, mobile_to_verify;
     private String mobile;
+    private Button btn_resend_sms;
 
 
     @Override
@@ -57,7 +61,10 @@ public class VerifyPhoneActivity extends AppCompatActivity {
         //initializing objects
         mAuth = FirebaseAuth.getInstance();
         editTextCode = findViewById(R.id.editTextCode);
-        timer = (TextView) findViewById(R.id.timer);
+        tv_timer = (TextView) findViewById(R.id.timer);
+        mobile_to_verify = (TextView) findViewById(R.id.mobile);
+        btn_resend_sms = (Button) findViewById(R.id.btn_resend_sms);
+
 
         startAnimation();
 
@@ -66,6 +73,8 @@ public class VerifyPhoneActivity extends AppCompatActivity {
         //and sending the verification code to the number
         Intent intent = getIntent();
         mobile = intent.getStringExtra("mobile");
+
+        mobile_to_verify.setText(mobile);
 
         sendVerificationCode(mobile);
 
@@ -121,6 +130,44 @@ public class VerifyPhoneActivity extends AppCompatActivity {
             }
         };
 
+
+        final CountDownTimer timer = new CountDownTimer(90000, 1000) {
+            int minute = 1, ticks = 0;
+            @Override
+            public void onTick(long l) {
+                ticks += 1;
+                minute = ((ticks == 30) && (minute != 0) && (l >= 60000))?(minute -= 1):minute;
+
+                //@todo: update ui for seconds\
+                int minutes = Integer.parseInt(Long.toString(l/60000));
+                int seconds = Integer.parseInt(Long.toString((l%60000)/1000));
+
+                if(l > 60000){
+                    tv_timer.setTextColor(getResources().getColor(R.color.green));
+                }else if((l <= 60000) && (l >= 30000)){
+                    tv_timer.setTextColor(getResources().getColor(R.color.orange));
+                }else{
+                    tv_timer.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+                }
+                tv_timer.setText(minutes + ":"+seconds);
+            }
+
+            @Override
+            public void onFinish() {
+                //@todo: show resend code button
+                btn_resend_sms.setTextColor(getResources().getColor(R.color.colorPrimaryLight));
+                btn_resend_sms.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        sendVerificationCode(mobile);
+                        /*Intent back = new Intent(VerifyPhoneActivity.this, PhoneAuthActivity.class);
+                        back.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(back);*/
+                    }
+                });
+            }
+        };
+
         Runnable verifyRunnable = new Runnable() {
             @SuppressLint("StaticFieldLeak")
             @Override
@@ -138,6 +185,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
                             super.verifyComplete(code);
                             if (code != null) {
                                 editTextCode.setText(code);
+                                timer.cancel();
                                 //verifying the code
                                 verifyVerificationCode(code);
                             }
@@ -148,6 +196,12 @@ public class VerifyPhoneActivity extends AppCompatActivity {
                             super.codeSent(s);
                             //storing the verification id that is sent to the user
                             mVerificationId = s;
+                        }
+
+                        @Override
+                        public void startTimer() {
+                            super.startTimer();
+                            timer.start();
                         }
                     }.execute(mobile);
                 }
@@ -160,51 +214,6 @@ public class VerifyPhoneActivity extends AppCompatActivity {
         verifyThread.start();
 
         //startTimer();
-    }
-
-    /**
-     * @param
-     * @exception InterruptedException check  for timer failure
-     * @throws InterruptedException stops timer and moves on
-     * @// TODO: 8/9/2018 set countdown timer when waiting for verification page
-     * @description shows countdown timer
-     */
-    private void startTimer() {
-
-        final Handler h = new Handler(){
-            @Override
-            public String getMessageName(Message message) {
-                return super.getMessageName(message);
-            }
-        };
-
-        Runnable timerAsync = new Runnable() {
-            @Override
-            public void run() {
-                int timerLeft = 60;
-                try{
-                    while(timerLeft > 0){
-                        sleep(1000);
-                        if(timerLeft > 30){
-                            timer.setTextColor(getResources().getColor(R.color.green));
-                        }else if((timerLeft < 30) && (timerLeft > 15)){
-                            timer.setTextColor(getResources().getColor(R.color.orange));
-                        }else{
-                            timer.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-                        }
-                        timer.setText(timerLeft);
-                        timerLeft -= 1;
-                    }
-                }catch(InterruptedException ex){
-
-                }
-                h.sendEmptyMessage(0);
-            }
-        };
-        Thread timerUIThread = new Thread(timerAsync);
-
-        timerUIThread.start();
-
     }
 
     private void verifyVerificationCode(String code) {

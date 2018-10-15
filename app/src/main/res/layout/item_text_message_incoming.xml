@@ -1,38 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:paddingEnd="30dp"
+    android:paddingStart="0dp"
     android:layout_height="wrap_content">
+
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/recieved_message_root"
-        android:visibility="gone"
+        android:layout_gravity="start"
         android:layout_alignParentStart="true"
+        android:id="@+id/wrapper"
         android:background="@drawable/balloon_incoming_normal"
-        android:layout_marginEnd="30dp"
         >
 
-
         <TextView
-            android:id="@+id/message_text"
+            android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat"
             android:layout_marginEnd="10dp"
-            android:layout_toStartOf="@+id/message_time"
-            android:text="hello wassup asdfjlkasjdflk alksjdflkajs dfllaksdfjalskdjf"
+            android:paddingBottom="12dp"
+            android:minWidth="80dp"
+            android:text="hi"
             android:textColor="@android:color/black" />
 
-        <TextView
-            android:id="@+id/message_time"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="10:45 PM"
-            android:layout_alignParentEnd="true"
-            android:textSize="12sp"
-            android:layout_marginTop="8dp"
-            android:drawablePadding="5dp"
-            />
+            android:layout_alignEnd="@+id/message"
+            android:layout_alignBottom="@+id/message"
+            android:orientation="horizontal"
+            android:gravity="end|bottom">
+
+            <TextView
+                android:id="@+id/message_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3356"
+                android:textSize="12sp"
+                android:drawablePadding="5dp"
+                />
+        </LinearLayout>
+
 
     </RelativeLayout>
+
 </RelativeLayout>

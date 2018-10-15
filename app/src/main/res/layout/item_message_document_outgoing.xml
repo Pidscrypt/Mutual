@@ -1,117 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/attachment_doc_relative_layout"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/attachment_audio"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="3dp">
+    android:paddingStart="30dp"
+    android:paddingEnd="0dp"
+    android:maxWidth="350dp"
+    android:minWidth="250dp"
+    android:layout_height="wrap_content">
     <LinearLayout
-        android:id="@+id/download_doc_linear_layout"
         android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/wrapper"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-
-        <RelativeLayout
-            android:id="@+id/download_doc_relative_layout"
-            android:layout_width="55dp"
-            android:layout_height="55dp">
-
-            <ImageView
-                android:id="@+id/download_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                app:srcCompat="@drawable/ic_file_download_black_24dp" />
-
-            <TextView
-                android:id="@+id/applozic_doc_file_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignEnd="@+id/download_image"
-                android:layout_alignParentBottom="true"
-                android:layout_alignRight="@+id/download_image"
-                android:text="20MB"
-                android:textColor="@color/colorPrimary" />
-
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/retry_doc_relative_layout"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:background="@color/colorPrimary"
-            >
-
-            <ImageView
-                android:id="@+id/applozic_retry__image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                app:srcCompat="@drawable/ic_file_upload_black_24dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignEnd="@+id/applozic_retry__image"
-                android:layout_alignParentBottom="true"
-                android:layout_alignRight="@+id/applozic_retry__image"
-                android:text="RETRY"
-                android:textColor="@color/colorPrimary"
-                android:textSize="10sp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/doc_download_progress_rl"
-            android:layout_width="55dp"
-            android:layout_height="55dp">
-
-            <ProgressBar
-                android:id="@+id/doc_download_progress"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_centerInParent="true"
-                android:indeterminate="true"
-                android:visibility="visible" />
-
-            <ImageView
-                android:id="@+id/download_calcle_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                app:srcCompat="@drawable/ic_cancel_black_24dp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/doc_downloaded"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:visibility="visible">
-
-            <!--ImageView
-                android:id="@+id/doc_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:src="@drawable/icon_file_doc" /-->
-        </RelativeLayout>
-
-        <TextView
-            android:id="@+id/doc_file_name"
+        android:background="@drawable/balloon_outgoing_normal">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_gravity="center"
-            android:layout_marginLeft="4dp"
-            android:layout_marginStart="4dp"
-            android:maxLines="1"
-            android:text=""
-            android:textColor="@color/colorPrimaryLight"
-            android:textSize="12sp" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/transparent_mid_bg">
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_file_doc" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:paddingHorizontal="@dimen/fab_margin"
+                android:text="@string/app_name"
+                android:id="@+id/filename"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="30dp"
+                android:src="@drawable/inline_audio_upload_normal" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:text="23kb"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="29sp"
+                    android:gravity="center_vertical"
+                    android:text=" . "/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="true"
+                    android:text="pdf"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/message_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3356"
+                    android:textSize="12sp"
+                    android:drawablePadding="5dp"
+                    />
+
+                <ImageView
+                    android:id="@+id/message_status"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:src="@drawable/message_got_read_receipt_from_target"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="5dp"
+                    />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

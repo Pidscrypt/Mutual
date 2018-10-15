@@ -1,5 +1,7 @@
 package pidscrypt.world.mutual.mutal.Database;
 
+import pidscrypt.world.mutual.mutal.R;
+
 public class CountryData {
     public static final String[] countryNames = {"Afghanistan", "Albania",
             "Algeria", "Andorra", "Angola", "Antarctica", "Argentina",
@@ -46,6 +48,35 @@ public class CountryData {
             "Holy See (vatican City State)", "Venezuela", "Viet Nam",
             "Wallis And Futuna", "Yemen", "Zambia", "Zimbabwe"};
 
+
+    public static final int[] countryFlags = {
+            R.drawable.af_60x42, R.drawable.al_60x42, R.drawable.dz_60x42, R.drawable.ad_16x11,
+            R.drawable.ao_60x42, R.drawable.aq_60x42, R.drawable.ar_16x11, R.drawable.am_60x42,
+            R.drawable.aw_60x42, R.drawable.au_60x42, R.drawable.at_60x42, R.drawable.az_60x42,
+            R.drawable.bh_60x42, R.drawable.bd_60x42, R.drawable.by_60x42, R.drawable.be_60x42,
+            R.drawable.bz_60x42, R.drawable.bj_60x42, R.drawable.bt_16x11, R.drawable.bo_16x11,
+            R.drawable.ba_60x42, R.drawable.bw_60x42, R.drawable.br_60x42,  R.drawable.bn_60x42, R.drawable.bg_60x42, R.drawable.bf_60x42,
+            R.drawable.mm_60x42, R.drawable.bi_16x11, R.drawable.kh_60x42, R.drawable.cm_60x42, R.drawable.ca_60x42,
+            R.drawable.cv_60x42, R.drawable.cf_60x42, R.drawable.td_60x42, R.drawable.cl_60x42, R.drawable.cn_60x42, R.drawable.cx_60x42, R.drawable.cc_60x42, R.drawable.co_60x42, R.drawable.km_60x42, R.drawable.cd_60x42, R.drawable.ck_60x42, R.drawable.cr_60x42,
+            R.drawable.hr_60x42, R.drawable.cu_60x42, R.drawable.cy_60x42, R.drawable.cz_60x42, R.drawable.dk_60x42, R.drawable.dj_60x42, R.drawable.tl_60x42, R.drawable.ec_60x42, R.drawable.eg_60x42, R.drawable.sv_60x42,
+            R.drawable.gq_60x42, R.drawable.er_60x42, R.drawable.ee_60x42, R.drawable.et_60x42, R.drawable.fk_60x42, R.drawable.fo_60x42, R.drawable.fj_60x42, R.drawable.fi_60x42, R.drawable.fr_60x42,
+            R.drawable.pf_60x42, R.drawable.ga_60x42, R.drawable.gm_60x42, R.drawable.ge_60x42, R.drawable.de_60x42, R.drawable.gh_60x42, R.drawable.gi_60x42, R.drawable.gr_60x42, R.drawable.gl_60x42, R.drawable.gt_60x42,
+            R.drawable.gn_60x42, R.drawable.gw_60x42, R.drawable.gy_60x42, R.drawable.ht_60x42, R.drawable.hn_60x42, R.drawable.hk_60x42, R.drawable.hu_60x42, R.drawable.in_60x42, R.drawable.id_60x42, R.drawable.ir_60x42,
+            R.drawable.iq_60x42, R.drawable.ie_60x42, R.drawable.im_60x42, R.drawable.il_60x42, R.drawable.it_60x42, R.drawable.ci_60x42, R.drawable.jm_60x42, R.drawable.jp_60x42, R.drawable.jo_60x42, R.drawable.kz_60x42,
+            R.drawable.ke_60x42, R.drawable.ki_60x42, R.drawable.kw_60x42, R.drawable.kg_60x42, R.drawable.la_60x42, R.drawable.lv_60x42, R.drawable.lb_60x42, R.drawable.ls_60x42, R.drawable.lr_60x42,
+            R.drawable.ly_60x42, R.drawable.li_60x42, R.drawable.lt_60x42, R.drawable.lu_60x42, R.drawable.mo_60x42, R.drawable.mk_60x42, R.drawable.mg_60x42, R.drawable.mw_60x42, R.drawable.my_60x42,
+            R.drawable.mv_60x42, R.drawable.ml_60x42, R.drawable.mt_60x42, R.drawable.mh_60x42, R.drawable.mr_60x42, R.drawable.mu_60x42, R.drawable.yt_60x42, R.drawable.mx_60x42, R.drawable.fm_60x42,
+            R.drawable.md_60x42, R.drawable.mc_60x42, R.drawable.mn_60x42, R.drawable.me_60x42, R.drawable.ma_60x42, R.drawable.mz_60x42, R.drawable.na_60x42, R.drawable.nr_60x42, R.drawable.np_60x42,
+            R.drawable.nl_60x42, R.drawable.nc_60x42, R.drawable.nz_60x42, R.drawable.ni_60x42, R.drawable.ne_60x42, R.drawable.ng_60x42, R.drawable.nu_60x42, R.drawable.kp_60x42, R.drawable.no_60x42, R.drawable.om_60x42,
+            R.drawable.pk_60x42, R.drawable.pw_60x42, R.drawable.pa_60x42, R.drawable.pg_60x42, R.drawable.py_60x42, R.drawable.pe_60x42, R.drawable.ph_60x42, R.drawable.pn_60x42, R.drawable.pl_60x42, R.drawable.pt_60x42,
+            R.drawable.pr_60x42, R.drawable.qa_60x42, R.drawable.ro_60x42, R.drawable.ru_60x42, R.drawable.rw_60x42, R.drawable.bl_16x11, R.drawable.ws_60x42, R.drawable.sm_60x42, R.drawable.st_60x42, R.drawable.sa_60x42,
+            R.drawable.sn_60x42, R.drawable.rs_60x42, R.drawable.sc_60x42, R.drawable.sl_60x42, R.drawable.sg_60x42, R.drawable.sk_60x42, R.drawable.si_60x42, R.drawable.sb_60x42, R.drawable.so_60x42, R.drawable.za_60x42,
+            R.drawable.kr_60x42, R.drawable.es_60x42, R.drawable.lk_60x42, R.drawable.sh_60x42, R.drawable.pm_60x42, R.drawable.sd_60x42, R.drawable.sr_60x42, R.drawable.sz_60x42, R.drawable.se_60x42, R.drawable.ch_60x42,
+            R.drawable.sy_60x42, R.drawable.tw_60x42, R.drawable.tj_60x42, R.drawable.tz_60x42, R.drawable.th_60x42, R.drawable.tg_60x42, R.drawable.tk_60x42, R.drawable.to_60x42, R.drawable.tn_60x42, R.drawable.tr_60x42,
+            R.drawable.tm_60x42, R.drawable.tv_60x42, R.drawable.ae_60x42, R.drawable.ug_60x42, R.drawable.gb_60x42, R.drawable.ua_60x42,
+            R.drawable.uy_60x42, R.drawable.us_60x42, R.drawable.uz_60x42, R.drawable.vu_60x42, R.drawable.va_60x42, R.drawable.ve_60x42, R.drawable.vn_60x42,
+            R.drawable.wf_60x42, R.drawable.ye_60x42, R.drawable.zm_60x42, R.drawable.zw_60x42};
+
     public static final String[] countryAreaCodes = {"93", "355", "213",
             "376", "244", "672", "54", "374", "297", "61", "43", "994", "973",
             "880", "375", "32", "501", "229", "975", "591", "387", "267", "55",
@@ -68,4 +99,5 @@ public class CountryData {
             "963", "886", "992", "255", "66", "228", "690", "676", "216", "90",
             "993", "688", "971", "256", "44", "380", "598", "1", "998", "678",
             "39", "58", "84", "681", "967", "260", "263"};
+
 }

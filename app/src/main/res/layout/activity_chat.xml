@@ -94,6 +94,20 @@
         android:orientation="horizontal"
         android:padding="8dp"
         android:gravity="center_vertical">
+
+        <!--com.nightonke.boommenu.BoomMenuButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/attach_file_btn"
+            android:layout_gravity="start"
+            android:baselineAlignBottom="true"
+            app:bmb_buttonRadius="20dp"
+            app:bmb_buttonLeftMargin="4dp"
+            app:bmb_buttonRightMargin="4dp"
+            app:bmb_buttonEnum="simpleCircle"
+            app:bmb_piecePlaceEnum="piecePlace_dot_6_1"
+            app:bmb_buttonPlaceEnum="buttonPlace_sc_6_1"/-->
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -109,7 +123,8 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="4dp"
                 android:tint="@color/colorGrey"
-                app:srcCompat="@drawable/ic_insert_emoticon_black_24dp"/>
+                android:padding="4dp"
+                android:src="@drawable/input_emoji"/>
             <android.support.design.widget.TextInputEditText
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -122,16 +137,21 @@
                 android:background="@color/colorPrimary"
                 android:hint="@string/message_tet_placeholder"
                 tools:ignore="NestedWeights" />
+
             <com.nightonke.boommenu.BoomMenuButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/attach_file_btn"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="start"
                 android:baselineAlignBottom="true"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
-                android:tint="#000"
+                android:layout_marginTop="4dp"
+                app:bmb_buttonRadius="15dp"
+                app:bmb_buttonLeftMargin="4dp"
+                app:bmb_buttonRightMargin="4dp"
                 app:bmb_buttonEnum="simpleCircle"
+                app:bmb_normalColor="@color/transparent"
+                app:bmb_highlightedColor="@color/colorTranslucent"
+                app:bmb_shadowRadius="0dp"
                 app:bmb_piecePlaceEnum="piecePlace_dot_6_1"
                 app:bmb_buttonPlaceEnum="buttonPlace_sc_6_1"/>
             <ImageView

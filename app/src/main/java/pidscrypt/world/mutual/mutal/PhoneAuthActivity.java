@@ -2,26 +2,25 @@ package pidscrypt.world.mutual.mutal;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import java.sql.Time;
-
+import de.hdodenhof.circleimageview.CircleImageView;
 import pidscrypt.world.mutual.mutal.Database.CountryData;
 
 import static java.lang.Thread.sleep;
 
 public class PhoneAuthActivity extends AppCompatActivity {
-    private EditText editTextMobile;
+    private EditText editTextMobile, country_code;
     private Spinner spinner;
+    private CircleImageView flag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +30,28 @@ public class PhoneAuthActivity extends AppCompatActivity {
         actionBar.hide();*/
 
         spinner = findViewById(R.id.spinnerCountries);
-        spinner.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item, CountryData.countryNames));
+        ArrayAdapter<String> countries = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item, CountryData.countryNames);
+        //spinner.setSelection(countries.getPosition("Uganda"), true);
+        spinner.setAdapter(countries);
+        spinner.setSelection(countries.getPosition("Uganda"),true);
 
         editTextMobile = (EditText) findViewById(R.id.editTextMobile);
+        country_code = (EditText) findViewById(R.id.country_code);
+        flag = (CircleImageView) findViewById(R.id.flag);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String c_code = CountryData.countryAreaCodes[i];
+                country_code.setText(c_code);
+                flag.setImageResource(CountryData.countryFlags[i]);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         findViewById(R.id.buttonContinue).setOnClickListener(new View.OnClickListener() {
             @Override

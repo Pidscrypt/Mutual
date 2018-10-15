@@ -52,7 +52,7 @@ public class ChatsFragment extends Fragment {
     private CollectionReference chatsRef;
     private ChatAdapter chatAdapter;
     private FirebaseUser  firebaseUser;
-    private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
+    //private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
 
 
     public ChatsFragment(){}
@@ -73,7 +73,8 @@ public class ChatsFragment extends Fragment {
         chatsRef = db.collection(DatabaseNode.CHATS);
         usersRef = db.collection(DatabaseNode.USERS);
         messagesRef = db.collection(DatabaseNode.MESSAGES).document(firebaseUser.getUid());
-        db.setFirestoreSettings(settings);
+        //db.setFirestoreSettings(settings);
+
         setupChats(layout);
 
         return layout;
@@ -83,6 +84,7 @@ public class ChatsFragment extends Fragment {
     private void setupChats(View view){
         Query query = chatsRef.document(firebaseUser.getUid()).collection("conversations").orderBy("timestamp", Query.Direction.DESCENDING);
         //Query query = messagesRef.whereEqualTo("senderId", firebaseUser.getUid());
+
         FirestoreRecyclerOptions<Conversation> options = new FirestoreRecyclerOptions.Builder<Conversation>().setQuery(query,Conversation.class).build();
 /*
         if(options.getSnapshots().isEmpty()){

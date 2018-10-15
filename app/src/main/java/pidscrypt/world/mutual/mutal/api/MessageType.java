@@ -7,4 +7,5 @@ public class MessageType {
     public static final int AUDIO = 5;
     public static final int VIDEO = 6;
     public static final int DOCUMENT = 7;
+    public static final int CONTACT = 8;
 }

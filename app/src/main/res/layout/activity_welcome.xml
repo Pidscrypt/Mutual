@@ -35,14 +35,14 @@
             android:layout_height="20dp"
             android:background="@drawable/shadow_ball"
             /-->
-        <Button
+        <!--Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Continue"
             android:id="@+id/btn_continue"
             android:layout_marginTop="20dp"
             android:textColor="@color/colorPrimary"
-            android:background="@drawable/btn_mutual"/>
+            android:background="@drawable/btn_mutual"/-->
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"

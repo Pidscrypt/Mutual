@@ -1,5 +1,6 @@
 package pidscrypt.world.mutual.mutal.media;
 
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 
@@ -13,6 +14,7 @@ import pidscrypt.world.mutual.mutal.api.MediaPath;
 public class Audio {
 
     private MediaRecorder mediaRecorder;
+    private MediaPlayer mediaPlayer;
     private String mediaLocation = null;
     private String mediaName = null;
     private String fileName;
@@ -36,11 +38,15 @@ public class Audio {
 
     public Audio(){
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        mediaName = "/AUD_"+timeStamp+".m4a";
+        mediaName = "/REC_"+timeStamp+".m4a";
         try {
             mediaLocation = createAudioFile(this.mediaName).getAbsolutePath();
             //fileName = android.os.Environment.getExternalStorageDirectory().getAbsolutePath()+mediaName;
         }catch (Exception o){}
+    }
+
+    public Audio(String mediaLocation){
+        this.mediaLocation = mediaLocation;
     }
 
     public void startRecording(){
@@ -65,8 +71,29 @@ public class Audio {
         mediaRecorder = null;
     }
 
-    public void play(){
+    public void startPlayback(){
+        mediaPlayer = new MediaPlayer();
+        preparePlayback(mediaPlayer);
+        try{
+         mediaPlayer.setDataSource(mediaLocation);
+         mediaPlayer.prepare();
+         mediaPlayer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+
+    public void preparePlayback(MediaPlayer mediaPlayer){
+
+    }
+
+    public void pausePlayback(){
+        mediaPlayer.pause();
+    }
+
+    public void stopPlayback(){
+        mediaPlayer.stop();
     }
 
 

@@ -16,7 +16,8 @@
         android:background="@drawable/red_bottom"
         android:minHeight="?attr/actionBarSize"
         app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:title="@string/app_name">
+        app:title="@string/app_name"
+        app:layout_scrollFlags="scroll|enterAlways">
 
     </android.support.v7.widget.Toolbar>
 

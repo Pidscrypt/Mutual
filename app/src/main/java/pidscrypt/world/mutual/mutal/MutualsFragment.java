@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class MutualsFragment extends Fragment implements LoaderManager.LoaderCal
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference userRef;
     private MutualsViewAdapter contactsViewAdapter;
+    private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
 
     /*
      * Defines an array that contains resource ids for the layout views
@@ -105,6 +107,7 @@ public class MutualsFragment extends Fragment implements LoaderManager.LoaderCal
         View layout = inflater.inflate(R.layout.fragment_contacts, container, false);
         contacts_recycler = layout.findViewById(R.id.contacts_recycler_view);
         userRef = db.collection(DatabaseNode.USERS);
+        //db.setFirestoreSettings(settings);
 
         mContacts = new Contacts(getContext());
 

@@ -9,8 +9,10 @@ public class ImageMessage extends ChatMessage {
         super();
     }
 
-    public ImageMessage(String senderId, String receiverId, String imageUri) {
+    public ImageMessage(String senderId, String receiverId, String imageUri, String localFile) {
         super(senderId, receiverId, imageUri, MessageType.IMAGE);
         setMessageStatus(MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER_ONMEDIA);
+        setLocalFile(localFile);
     }
+
 }

@@ -2,14 +2,18 @@ package pidscrypt.world.mutual.mutal.services;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,6 +35,7 @@ public class Contacts {
     private Context mContext;
     private CollectionReference contactsRef = FirebaseFirestore.getInstance().collection(DatabaseNode.CONTACTS);
     private List<Contact> mutualContacts, noneMutualContacts;
+    private SharedPreferences sharedPreferences;
 
     /*
      * Defines an array that contains column names to move from
@@ -49,6 +54,7 @@ public class Contacts {
 
     public Contacts(Context mContext) {
         this.mContext = mContext;
+        sharedPreferences = this.mContext.getSharedPreferences("contact_data",0);
     }
 
     public List<Contact> fetctContacts(){
@@ -56,6 +62,7 @@ public class Contacts {
         mutualContacts = new ArrayList<>();
         noneMutualContacts = new ArrayList<>();
         List<String> eraser = new ArrayList<>();
+        SharedPreferences.Editor editor;
 
         // cursor get all contacts in the phone
         Cursor cursor = mContext.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null, null,FROM_COLUMNS[0] + " ASC");
@@ -86,6 +93,9 @@ public class Contacts {
                     if(documentSnapshot.exists()){
                         cont.setMutual(1);
                         mutualContacts.add(cont);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(cont.getNumber(),cont.getName());
+                        editor.apply();
                     }else{
                         cont.setMutual(2);
 
@@ -94,6 +104,7 @@ public class Contacts {
                 }
             });
 
+            contactsRef.document(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber()).collection("my_contacts").add(cont);
 
             eraser.add(phone);
         }

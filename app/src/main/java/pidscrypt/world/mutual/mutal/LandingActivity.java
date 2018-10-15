@@ -60,7 +60,7 @@ public class LandingActivity extends AppCompatActivity implements ChatsFragment.
         mTabLayout.setupWithViewPager(mViewPager);
 
         mTabLayout.getTabAt(3).setIcon(R.drawable.ic_group);
-        mTabLayout.getTabAt(0).setIcon(R.drawable.ic_contact_mail);
+        //mTabLayout.getTabAt(0).setIcon(R.drawable.ic_contact_mail);
 
         mViewPager.setCurrentItem(1,true);
 

@@ -10,4 +10,6 @@ public class DatabaseNode {
     public static final String FEEDS = "feeds";
     public static final String CONTACTS = "contacts";
     public static final String RECORDINGS = "recordings";
+    public static final String AUDIO = "audio";
+    public static final String DOCUMENTS = "documents";
 }

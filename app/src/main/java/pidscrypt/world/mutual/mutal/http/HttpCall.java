@@ -13,7 +13,16 @@ public class HttpCall {
 
     private String url;
     private int methodType;
-    private HashMap<String,String> params;
+    private HashMap<String,String> params = null;
+    private boolean FOR_FILE = false;
+
+    public void setFOR_FILE(boolean FOR_FILE) {
+        this.FOR_FILE = FOR_FILE;
+    }
+
+    public boolean isFOR_FILE() {
+        return FOR_FILE;
+    }
 
     public String getUrl() {
         return url;

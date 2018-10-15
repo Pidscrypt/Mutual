@@ -7,10 +7,11 @@ public class Conversation {
     private long timestamp;
     private long start_date;
     private String lastMsg;
+    private int lastMsgType;
     private String img_uri;
-    private int last_msg_status;
+    private int lastMsgStatus;
     private int count = 0;
-    private String with;
+    private String with, withPhone;
     private String uid;
 
     public Conversation() {
@@ -20,7 +21,19 @@ public class Conversation {
         this.seen = seen;
         this.start_date = start_date;
         this.img_uri = img_uri;
-        this.last_msg_status = MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER;
+        this.lastMsgStatus = MessageStatus.MESSAGE_GOT_RECIEPT_FROM_SERVER;
+    }
+
+    public String getWithPhone() {
+        return withPhone;
+    }
+
+    public int getLastMsgType() {
+        return lastMsgType;
+    }
+
+    public void setLastMsgType(int lastMsgType) {
+        this.lastMsgType = lastMsgType;
     }
 
     public String getUid() {
@@ -67,8 +80,8 @@ public class Conversation {
         return img_uri;
     }
 
-    public int getLast_msg_status() {
-        return last_msg_status;
+    public int getLastMsgStatus() {
+        return lastMsgStatus;
     }
 
     public void setLastMsg(String lastMsg) {

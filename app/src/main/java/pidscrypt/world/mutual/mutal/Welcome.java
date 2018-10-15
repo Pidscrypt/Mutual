@@ -65,7 +65,7 @@ public class Welcome extends AppCompatActivity {
         //actionBar.hide();
 
         welcome_reveal = (LinearLayout)findViewById(R.id.moving_bg);
-        btn_continue = (Button) findViewById(R.id.btn_continue);
+        //btn_continue = (Button) findViewById(R.id.btn_continue);
         logo = findViewById(R.id.logo);
         logo_container = (LinearLayout) findViewById(R.id.logo_container);
 
@@ -85,7 +85,7 @@ public class Welcome extends AppCompatActivity {
                         }
 
                         handler.sendEmptyMessage(0);
-                        overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_done);
+                        overridePendingTransition(R.anim.slide_in_from_right, R.anim.fui_slide_out_left);
                         finish();
 
             }

@@ -13,6 +13,8 @@ public class ChatMessage {
     private long time_sent;
     private long time_recieved;
     private int messageStatus;
+    private String localFile, fileName;
+    private String firebaseStorageLocation;
 
     private int messageType;
 
@@ -24,6 +26,22 @@ public class ChatMessage {
         this.message = message;
         this.time_sent = new Date().getTime();
         this.messageType = messageType;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFirebaseStorageLocation() {
+        return firebaseStorageLocation;
+    }
+
+    public void setFirebaseStorageLocation(String firebaseStorageLocation) {
+        this.firebaseStorageLocation = firebaseStorageLocation;
     }
 
     public String getReceiverId() {
@@ -57,5 +75,13 @@ public class ChatMessage {
 
     void setMessageStatus(int messageStatus) {
         this.messageStatus = messageStatus;
+    }
+
+    public void setLocalFile(String localFile) {
+        this.localFile = localFile;
+    }
+
+    public String getLocalFile() {
+        return localFile;
     }
 }

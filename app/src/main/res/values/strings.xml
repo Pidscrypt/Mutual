@@ -175,7 +175,7 @@
     <string name="id_fmt">User ID: %s</string>
     <string name="email_fmt">Email: %s</string>
     <string name="code_hint_txt">You will recieve an SMS short code. Please enter code below if not detected automatically</string>
-    <string name="verify_hint">Enter verification code here ...</string>
+    <string name="verify_hint">-- -- --   -- -- --</string>
     <string name="complete_setup">Complete setup!</string>
     <string name="action_search">Search</string>
     <string name="enter_name_placeholder">Username</string>

@@ -15,12 +15,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.text.format.DateFormat;
 
 //import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -58,7 +61,7 @@ public class EnterUserActivity extends AppCompatActivity {
 
     private Button btn_submit_user_details;
     private CircleImageView userImage;
-    private EditText username, user_tag;
+    private EditText username;
     private String uid;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private StorageReference mStorage = FirebaseStorage.getInstance().getReference();
@@ -66,6 +69,7 @@ public class EnterUserActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener firebaseAuthState;
     private ProgressDialog mProgress;
     private String image_uri = null;
+    private ProgressBar upload_progress;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,7 +81,7 @@ public class EnterUserActivity extends AppCompatActivity {
         btn_submit_user_details = (Button) findViewById(R.id.btn_submit_user_details);
         userImage = (CircleImageView) findViewById(R.id.user_img);
         username = (EditText) findViewById(R.id.user_name);
-        user_tag = (EditText) findViewById(R.id.user_tag);
+        upload_progress = (ProgressBar) findViewById(R.id.upload_progress);
 
         uid = FirebaseAuth.getInstance().getUid();
         final String phone = getIntent().getStringExtra("phone");
@@ -116,7 +120,7 @@ public class EnterUserActivity extends AppCompatActivity {
                                 user_name,
                                 phone,
                                 image_uri != null?image_uri:"",
-                                user_tag.getText().toString().trim().isEmpty()?"Hi! Look, am using Mutual Chat!":user_tag.getText().toString().trim(),
+                                "Hi! Look, am using Mutual Chat!",
                                 uid,
                                 last_seen,
                                 UserStatus.ONLINE
@@ -180,11 +184,13 @@ public class EnterUserActivity extends AppCompatActivity {
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
-                mProgress = new ProgressDialog(EnterUserActivity.this);
+                /*mProgress = new ProgressDialog(EnterUserActivity.this);
                 mProgress.setTitle("Updating Image");
                 mProgress.setMessage("please wait while we update status!");
                 mProgress.setCanceledOnTouchOutside(false);
-                mProgress.show();
+                mProgress.show();*/
+
+                upload_progress.setVisibility(View.VISIBLE);
 
                 Uri resultUri = result.getUri();
 
@@ -223,19 +229,23 @@ public class EnterUserActivity extends AppCompatActivity {
                                         });
 
                                         Glide.with(EnterUserActivity.this).load(image_uri).into(userImage);
-                                        mProgress.dismiss();
+                                        //mProgress.dismiss();
+                                        upload_progress.setVisibility(View.GONE);
 
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        mProgress.dismiss();
+                                        //mProgress.dismiss();
+                                        upload_progress.setVisibility(View.GONE);
                                         Toast.makeText(EnterUserActivity.this, "Failed to update profile.", Toast.LENGTH_SHORT).show();
                                     }
                                 });
-                                mProgress.dismiss();
+                                //mProgress.dismiss();
+                                upload_progress.setVisibility(View.GONE);
                             }else{
-                                mProgress.dismiss();
+                                //mProgress.dismiss();
+                                upload_progress.setVisibility(View.GONE);
                                 Toast.makeText(EnterUserActivity.this,"image upload failed",Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -277,7 +287,14 @@ public class EnterUserActivity extends AppCompatActivity {
 
                             username.setText(user_name);
                             if(!document.getString("image_uri").equals("")){
-                                Glide.with(getApplicationContext()).load(document.getString("image_url")).into(userImage);
+
+                                RequestOptions requestOptions = new RequestOptions()
+                                        .placeholder(R.drawable.avatar_contact)
+                                        .error(R.drawable.avatar_contact)
+                                        .diskCacheStrategy(DiskCacheStrategy.ALL);
+                                Glide.with(EnterUserActivity.this).setDefaultRequestOptions(requestOptions).load(document.getString("image_url")).thumbnail(0.5f).into(userImage);
+
+                                //Glide.with(getApplicationContext()).load(document.getString("image_url")).into(userImage);
                             }else{
                                 userImage.setImageResource(R.drawable.avatar_contact);
                             }

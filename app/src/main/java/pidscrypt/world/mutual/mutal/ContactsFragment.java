@@ -24,6 +24,7 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference userRef;
     private ContactsViewAdapter contactsViewAdapter;
+    private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
 
     /*
      * Defines an array that contains resource ids for the layout views
@@ -101,6 +103,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         contacts_recycler = layout.findViewById(R.id.contacts_recycler_view);
 
         userRef = db.collection(DatabaseNode.USERS);
+        //db.setFirestoreSettings(settings);
 
         mContacts = new Contacts(getContext());
 

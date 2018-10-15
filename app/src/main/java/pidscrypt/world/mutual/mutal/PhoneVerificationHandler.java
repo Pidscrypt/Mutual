@@ -58,6 +58,16 @@ public class PhoneVerificationHandler extends AsyncTask<String, Void, Boolean> {
     }
 
     @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        startTimer();
+    }
+
+    public void startTimer(){
+
+    }
+
+    @Override
     protected void onPostExecute(Boolean res) {
         super.onPostExecute(res);
         responseRecieved(res);

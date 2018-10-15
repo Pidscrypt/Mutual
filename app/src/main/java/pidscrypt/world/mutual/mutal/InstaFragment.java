@@ -63,7 +63,7 @@ public class InstaFragment extends Fragment {
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         feedsRef = db.collection(DatabaseNode.FEEDS);
-        db.setFirestoreSettings(settings);
+        //db.setFirestoreSettings(settings);
         setupFeeds(layout);
 
         btn_add_feed.setOnClickListener(new View.OnClickListener() {

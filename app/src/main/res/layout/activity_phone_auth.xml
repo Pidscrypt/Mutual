@@ -12,25 +12,40 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="@drawable/mutual_bg_waves">
-
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="25dp"
+            android:text="Verify your phone number."
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:layout_marginTop="180dp"
-            android:paddingHorizontal="16dp">
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="25dp"
-                android:text="Enter phone number below."
-                android:textColor="@color/colorAccent" />
-            <Spinner
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/spinnerCountries" />
+                android:layout_height="wrap_content">
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:id="@+id/flag"
+                    android:src="@drawable/ug_60x42"/>
+                <Spinner
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:id="@+id/spinnerCountries"
+                    android:spinnerMode="dialog"
+                    />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -38,32 +53,35 @@
                 android:orientation="horizontal"
                 android:padding="15dp">
                 <EditText
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/country_code" />
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
+                    android:id="@+id/country_code"
+                    android:drawablePadding="4dp"
+                    android:textAlignment="center"
+                    android:hint="256"
+                    android:background="@drawable/red_bottom"/>
 
                 <EditText
                     android:id="@+id/editTextMobile"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
                     android:drawablePadding="10dp"
+                    android:layout_marginStart="10dp"
                     android:background="@drawable/red_bottom"
-                    android:hint="User mobile"
+                    android:hint="phone number"
                     android:inputType="phone"
                     android:maxLength="10" />
             </LinearLayout>
-
 
             <Button
                 android:id="@+id/buttonContinue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="50dp"
                 android:background="@drawable/btn_mutual"
-                android:text="Continue"
-                android:textAllCaps="false"
+                android:text="Next"
                 android:textColor="#cdd8f1" />
 
         </LinearLayout>

@@ -75,6 +75,14 @@
                     android:id="@+id/message_status"
                     android:baselineAlignBottom="true"
                     android:src="@drawable/message_got_receipt_from_target"/>
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_gravity="center"
+                    android:id="@+id/message_type"
+                    android:baselineAlignBottom="true"
+                    />
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -85,7 +93,9 @@
                     android:maxLines="1"
                     android:textAlignment="textStart"
                     android:text=""
-                    android:gravity="start"/>
+                    android:gravity="start"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:maxWidth="50dp"

@@ -46,7 +46,7 @@ public class LandingPagerAdapter extends FragmentStatePagerAdapter {
 
         switch(position) {
             case 0:
-                return "";
+                return "Contacts";
             case 1:
                 return "Chats";
             case 2:

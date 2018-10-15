@@ -7,11 +7,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,18 +29,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.Slide;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,17 +43,13 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.firebase.ui.auth.data.model.User;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentListenOptions;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -63,38 +57,41 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.nightonke.boommenu.BoomButtons.BoomButton;
+import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomButtons.SimpleCircleButton;
 import com.nightonke.boommenu.BoomMenuButton;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import pidscrypt.world.mutual.mutal.Adapters.ChatMessagesViewAdapter;
 import pidscrypt.world.mutual.mutal.api.AudioMessage;
-import pidscrypt.world.mutual.mutal.api.Chat;
 import pidscrypt.world.mutual.mutal.api.ChatMessage;
+import pidscrypt.world.mutual.mutal.api.ContactMessage;
 import pidscrypt.world.mutual.mutal.api.Conversation;
 import pidscrypt.world.mutual.mutal.api.DatabaseNode;
+import pidscrypt.world.mutual.mutal.api.DocumentMessage;
 import pidscrypt.world.mutual.mutal.api.ImageMessage;
-import pidscrypt.world.mutual.mutal.api.MessageStatus;
+import pidscrypt.world.mutual.mutal.api.MediaPath;
 import pidscrypt.world.mutual.mutal.api.MessageType;
 import pidscrypt.world.mutual.mutal.api.MutualDateFormat;
 import pidscrypt.world.mutual.mutal.api.TextMessage;
+import pidscrypt.world.mutual.mutal.constants.MediaAction;
 import pidscrypt.world.mutual.mutal.media.Audio;
-import pidscrypt.world.mutual.mutal.messenger.Message;
+import pidscrypt.world.mutual.mutal.media.Media;
+import pidscrypt.world.mutual.mutal.media.MediaUpload;
 import pidscrypt.world.mutual.mutal.user.MutualUser;
 
 public class ChatActivity extends AppCompatActivity {
@@ -123,11 +120,22 @@ public class ChatActivity extends AppCompatActivity {
     private String chatPhone = "";
     private FirebaseAuth firebaseAuth;
     private boolean recording = false;
-    //private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
+    private Uri cameraPhotoUri;
+    static float sAnimatorScale = 1;
+    private FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(true).build();
 
     String mCurrentPhotoPath;
+    private Conversation conversation;
 
     static final int REQUEST_TAKE_PHOTO = 1;
+
+    @SuppressLint("InlinedApi")
+    private final static String[] FROM_COLUMNS = {
+            Build.VERSION.SDK_INT
+                    >= Build.VERSION_CODES.HONEYCOMB ?
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY :
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+    };
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -140,7 +148,7 @@ public class ChatActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setupWindowAnimations();
-        //db.setFirestoreSettings(settings);
+        db.setFirestoreSettings(settings);
 
         text_msg = (TextInputEditText) findViewById(R.id.text_msg);
         name_chat = (TextView) findViewById(R.id.name_chat);
@@ -156,14 +164,71 @@ public class ChatActivity extends AppCompatActivity {
         mStorage = FirebaseStorage.getInstance().getReference();
         mCurrentUserId = firebaseAuth.getInstance().getUid();
 
-
-
         messageRefInChat = db.collection(DatabaseNode.MESSAGES);
         usersRef = db.collection(DatabaseNode.USERS);
         chatReference = db.collection(DatabaseNode.CHATS).document(mCurrentUserId);
 
         Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
+        conversation = bundle.getParcelable("conversation");
+
+        if (conversation != null) {
+            name_chat.setText(conversation.getWith());
+            MutualDateFormat timeAgo = new MutualDateFormat();
+            //final String last_seen = timeAgo.getTimeAgo(Long.valueOf(b.getString("last_seen")), getApplicationContext());
+
+            //lastSeen.setText(b.getBoolean("isOnline")?"online":last_seen);
+            chatUId = conversation.getUid();
+
+            OtherChatReference = db.collection(DatabaseNode.CHATS).document(chatUId);
+
+            usersRef.document(chatUId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    //MutualDateFormat mTimeAgo = new MutualDateFormat();
+                    long lastTime = Long.parseLong(documentSnapshot.get("last_seen").toString());
+                    String lastSeenTime = MutualDateFormat.getTimeAgo(lastTime, getApplicationContext());
+                    lastSeen.setText(documentSnapshot.getBoolean("online") ?"online":lastSeenTime);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    lastSeen.setText("");
+                }
+            });
+            //lastSeen.setText(?"online":last_seen);
+
+            usersRef.document(chatUId).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                    if(e != null){
+                        lastSeen.setText("");
+                    }
+                    if(!documentSnapshot.getBoolean("online")){
+                        String lastSeenTime = MutualDateFormat.getTimeAgo(Long.parseLong(documentSnapshot.get("last_seen").toString()), getApplicationContext());
+                        lastSeen.setText(lastSeenTime);
+                    }else{
+                        lastSeen.setText("online");
+                    }
+
+                }
+            });
+
+            chatPhone = conversation.getPhone();
+
+
+            if(!mutualUser.getImage_uri().trim().isEmpty()){
+                RequestOptions requestOptions = new RequestOptions()
+                        .placeholder(R.drawable.avatar_contact)
+                        .error(R.drawable.bg_outline_gray)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL);
+                chatImageUri = mutualUser.getImage_uri();
+                Glide.with(ChatActivity.this).setDefaultRequestOptions(requestOptions).load(mutualUser.getImage_uri()).thumbnail(0.5f).into(user_img);
+            }else{
+                user_img.setImageResource(R.drawable.avatar_contact);
+            }
+        }
+
+        /*if (bundle != null) {
             Bundle b = bundle.getBundle("chat_details");
             name_chat.setText(b.getString("chat_name"));
             MutualDateFormat timeAgo = new MutualDateFormat();
@@ -219,7 +284,7 @@ public class ChatActivity extends AppCompatActivity {
             }else{
                 user_img.setImageResource(R.drawable.avatar_contact);
             }
-        }
+        }*/
 
 
         chatReference.collection("conversations").document(chatUId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -237,6 +302,8 @@ public class ChatActivity extends AppCompatActivity {
                             final Conversation mine = new Conversation(shared.isSeen(), shared.getStart_date(), chatImageUri);
                             mine.setWith(user.getPhone());
                             mine.setUid(user.getUId());
+                            mine.setLastMsgType(1);
+                            mine.setTimestamp(new Date().getTime());
                             chatReference.collection("conversations").document(chatUId).set(mine);
                         }
                     });
@@ -250,6 +317,8 @@ public class ChatActivity extends AppCompatActivity {
                             //others.setTimestamp(mine.getTimestamp());
                             others.setWith(user.getPhone());
                             others.setUid(user.getUId());
+                            others.setLastMsgType(1);
+                            others.setTimestamp(new Date().getTime());
                             OtherChatReference.collection("conversations").document(mCurrentUserId).set(others);
                         }
                     });
@@ -298,7 +367,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //@TODO: button send click actions
-                sendMessage(MessageType.TEXT, null);
+                sendMessage(MessageType.TEXT, text_msg.getText().toString(), null);
                 text_msg.setText("");
                 send_audio_btn.setVisibility(View.VISIBLE);
                 send_message_btn.setVisibility(View.GONE);
@@ -362,7 +431,7 @@ public class ChatActivity extends AppCompatActivity {
                                     filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                         @Override
                                         public void onSuccess(Uri uri) {
-                                            sendMessage(MessageType.AUDIO, uri.toString());
+                                            sendMessage(MessageType.AUDIO, uri.toString(), mAudioPlayer.getFileUri().toString());
                                             dialogInterface.cancel();
                                         }
                                     });
@@ -381,10 +450,83 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        final int resourceImages[] = {
+                R.drawable.attach_gallery,
+                R.drawable.attach_audio,
+                R.drawable.attach_camera,
+                R.drawable.attach_contact,
+                R.drawable.attach_document,
+                R.drawable.attach_video
+        };
+
+
 
         for (int i = 0; i < open_attachments.getPiecePlaceEnum().pieceNumber(); i++) {
             SimpleCircleButton.Builder builder = new SimpleCircleButton.Builder()
-                    .normalImageRes(R.drawable.avatar_contact);
+                    .normalImageRes(resourceImages[i])
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            switch(index){
+                                case 0:
+                                    Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                                    galleryIntent.setType("image/*");
+                                    startActivityForResult(Intent.createChooser(galleryIntent, "Choose Image"), MediaAction.PIC_FROM_GALLERY);
+                                    break;
+                                case 1:
+                                    Intent audioIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                                    audioIntent.setType("audio/*");
+                                    startActivityForResult(audioIntent,MediaAction.AUDIO);
+                                    break;
+                                case 2:
+                                    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                    File photo = new File(Environment.getExternalStorageDirectory(), "pic.jpg");
+                                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
+                                    cameraPhotoUri = Uri.fromFile(photo);
+                                    startActivityForResult(cameraIntent,MediaAction.TAKE_PICTURE);
+                                    //takePhoto();
+                                    break;
+                                case 3:
+                                    Intent contactIntent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+                                    startActivityForResult(contactIntent,MediaAction.CONTACT);
+                                    break;
+                                case 4:
+                                    String[] mimeTypes = {
+                                            "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                            "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                                            "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                            "text/plain",
+                                            "application/pdf",
+                                            "application/zip"
+                                    };
+                                    Intent documentIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                                    documentIntent.addCategory(Intent.CATEGORY_OPENABLE);
+
+                                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+                                        documentIntent.setType(mimeTypes.length == 1 ?mimeTypes[0] : "*/*");
+                                        if(mimeTypes.length > 0){
+                                            documentIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+                                        }
+                                    }else {
+                                        String mimeTypesStr = "";
+                                        for(String mimeType : mimeTypes){
+                                            mimeTypesStr += mimeType + "|";
+                                        }
+                                        documentIntent.setType(mimeTypesStr.substring(0, mimeTypesStr.length() - 1));
+                                    }
+
+                                    startActivityForResult(Intent.createChooser(documentIntent, "ChooseFile"),MediaAction.DOCUMENT);
+                                    break;
+                                case 5:
+                                    Intent videoIntent = new Intent(Intent.ACTION_PICK);
+                                    videoIntent.setType("video/*");
+                                    startActivityForResult(videoIntent,MediaAction.VIDEO);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    });
             open_attachments.addBuilder(builder);
         }
 /*
@@ -445,43 +587,182 @@ public class ChatActivity extends AppCompatActivity {
                 //takePhoto();
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK);
                 galleryIntent.setType("image/*");
-                startActivityForResult(galleryIntent,2);
+                startActivityForResult(galleryIntent, MediaAction.PIC_FROM_GALLERY);
             }
         });
 
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent contact_profile_intent = new Intent(ChatActivity.this, ContactProfileActivity.class);
+                contact_profile_intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(contact_profile_intent);
+                overridePendingTransition(R.anim.fab3_show, R.anim.alpha);
             }
         });
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 2 && resultCode == RESULT_OK){
-            //sendMessage(MessageType.IMAGE, data);
-            Uri imageUri = data.getData();
-            final StorageReference filepath = mStorage.child(DatabaseNode.IMAGES).child(imageUri.getLastPathSegment());
-            filepath.putFile(imageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    if(task.isSuccessful()){
-                        filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(Uri uri) {
-                                sendMessage(MessageType.IMAGE, uri.toString());
-                            }
-                        });
+    private String getPath(Uri uri) {
+        String scheme = uri.getScheme();
 
-                    }else{
-                        Toast.makeText(ChatActivity.this,"upload failed",Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
+        if ("file".equalsIgnoreCase(scheme)) return uri.getPath();
+        else if ("content".equalsIgnoreCase(scheme)) return getFilePathFromMedia(uri);
+
+        return "";
+    }
+
+    private String getFilePathFromMedia(Uri uri) {
+        String data = "_data";
+        String[] projection = { data };
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndex(data);
+        if (cursor.moveToFirst()) {
+            String filePath = cursor.getString(column_index);
+            cursor.close();
+            return filePath;
         }
+        return "";
+    }
+
+    private void copyFile(final Uri uri) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (this){
+                    String path = getPath(uri);
+                    File sourceFile = new File(path);
+                    File destinationFile = new File(new File(android.os.Environment.getExternalStorageDirectory(), MediaPath.IMAGE_SENT_FOLDER) + "/" + uri.getLastPathSegment());
+                    copyFile(sourceFile, destinationFile);
+                }
+            }
+        }, 100);
+    }
+
+    private static boolean copyFile(File sourceFile, File destinationFile) {
+        FileInputStream sourceStream = null;
+        FileOutputStream destinationStream = null;
+        try {
+            sourceStream = new FileInputStream(sourceFile);
+            destinationStream = new FileOutputStream(destinationFile);
+
+            FileChannel destinationFileChannel = destinationStream.getChannel();
+            FileChannel sourceFileChannel = sourceStream.getChannel();
+
+            long fileSize = sourceFileChannel.size();
+            int startPosition = 0;
+
+            destinationFileChannel.transferFrom(sourceFileChannel, startPosition, fileSize);
+
+            return true;
+        }
+        catch (IOException e) {
+            // TODO log "I/O Error: " + e.getMessage()
+            return false;
+        }
+        finally {
+            // formatter:off
+            try { sourceStream.close(); } catch (Exception e) { /* TODO log "Error closing source stream." */ }
+            try { destinationStream.close(); } catch (Exception e) { /* TODO log "Error closing destination stream." */ }
+            // formatter:on
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK){
+            switch(requestCode){
+                case MediaAction.PIC_FROM_GALLERY:
+                    final Media img_from_gallery = new Media();
+                    img_from_gallery.setFileUri(data.getData());
+                    img_from_gallery.setStorageNode(DatabaseNode.IMAGES);
+                    new MediaUpload(img_from_gallery){
+                        @Override
+                        public void onUploadSuccess(Media media) {
+                            //copyFile(fileResult.getFileUri());
+                            try{
+                                sendMessage(MessageType.IMAGE, media.getDownloadUrl(), media.getFileUri().getPath());
+                            }catch (Exception exc){
+                                Log.d("mutual_image", exc.getMessage());
+                            }
+
+                        }
+
+                        @Override
+                        public void onPreUpload(String localFileLocation) {
+                            super.onPreUpload(localFileLocation);
+                        }
+                    }.upload();
+                    break;
+                case MediaAction.AUDIO:
+                    final Media audio_selected = new Media();
+                    audio_selected.setFileUri(data.getData());
+                    audio_selected.setStorageNode(DatabaseNode.AUDIO);
+                    new MediaUpload(audio_selected){
+                        @Override
+                        public void onUploadSuccess(Media media) {
+                            //copyFile(fileResult.getFileUri());
+                            sendMessage(MessageType.AUDIO, media.getDownloadUrl(),  media.getFileUri().getPath());
+                        }
+
+                        @Override
+                        public void onPreUpload(String localFileLocation) {
+                            super.onPreUpload(localFileLocation);
+                        }
+                    }.upload();
+                    break;
+                case MediaAction.TAKE_PICTURE:
+                    final Media img_from_camera = new Media();
+                    img_from_camera.setFileUri(data.getData());
+                    img_from_camera.setStorageNode(DatabaseNode.IMAGES);
+                    new MediaUpload(img_from_camera){
+                        @Override
+                        public void onUploadSuccess(Media media)  {
+                            //copyFile(fileResult.getFileUri());
+                            sendMessage(MessageType.IMAGE, media.getDownloadUrl(), media.getFileUri().getPath());
+                        }
+
+                        @Override
+                        public void onPreUpload(String localFileLocation) {
+                            super.onPreUpload(localFileLocation);
+                        }
+                    }.upload();
+                    break;
+                case MediaAction.CONTACT:
+                    Uri contactData = data.getData();
+                    Cursor c = getContentResolver().query(contactData,null,null,null,null);
+                    if(c.moveToFirst()){
+                        String phone = c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        String name = c.getString(c.getColumnIndex(FROM_COLUMNS[0]));
+                        //c.close();
+                        //sendTextMessage(MessageType.TEXT, name);
+                        //Log.d("tester",name + " : " + phone);
+                        sendMessage(MessageType.CONTACT, name, phone);
+                    }
+
+                    break;
+                case MediaAction.DOCUMENT:
+                    final Media doc_from_chooser = new Media();
+                    doc_from_chooser.setFileUri(data.getData());
+                    doc_from_chooser.setStorageNode(DatabaseNode.DOCUMENTS);
+                    new MediaUpload(doc_from_chooser){
+                        @Override
+                        public void onUploadSuccess(Media media)  {
+                            sendMessage(MessageType.DOCUMENT, media.getDownloadUrl(), media.getFileUri().getLastPathSegment());
+                        }
+
+                        @Override
+                        public void onPreUpload(String localFileLocation) {
+                            super.onPreUpload(localFileLocation);
+                        }
+                    }.upload();
+                    break;
+
+            }
+        }
+
     }
 
     private void setupWindowAnimations() {
@@ -519,42 +800,68 @@ public class ChatActivity extends AppCompatActivity {
         chat_messages_recycler.setHasFixedSize(true);
         chat_messages_recycler.setLayoutManager(new LinearLayoutManager(this));
         chat_messages_recycler.setAdapter(chatItemsViewAdapter);
+
+        chatItemsViewAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                chat_messages_recycler.smoothScrollToPosition(chatItemsViewAdapter.getItemCount());
+            }
+        });
     }
 
-    private void sendMessage(int messageType, String uri){
-        ChatMessage chatMessage = null;
+
+
+    private void sendMessage(int messageType, String message, String uriLocal){
+        ChatMessage chatMessage;
 
         switch(messageType){
+            case MessageType.IMAGE:
+                chatMessage = new ImageMessage(FirebaseAuth.getInstance().getUid(), chatUId,message, uriLocal);
+                break;
+            case MessageType.AUDIO:
+                chatMessage = new AudioMessage(FirebaseAuth.getInstance().getUid(), chatUId, message, uriLocal);
+                break;
             case MessageType.TEXT:
-                String message = text_msg.getText().toString();
                 if(message.trim().isEmpty()){
                     return;
                 }
                 chatMessage = new TextMessage(FirebaseAuth.getInstance().getUid(),chatUId,message);
                 break;
-            case MessageType.IMAGE:
-                chatMessage = new ImageMessage(FirebaseAuth.getInstance().getUid(), chatUId,uri);
+            case MessageType.DOCUMENT:
+                chatMessage = new DocumentMessage(FirebaseAuth.getInstance().getUid(), chatUId, message, uriLocal);
                 break;
-            case MessageType.AUDIO:
-                chatMessage = new AudioMessage(FirebaseAuth.getInstance().getUid(), chatUId, uri);
+            case MessageType.CONTACT:
+                chatMessage = new ContactMessage(FirebaseAuth.getInstance().getUid(), chatUId, message, uriLocal);
+                break;
+            default:
+                chatMessage = null;
+                break;
         }
         CollectionReference messagesRef = FirebaseFirestore.getInstance().collection(DatabaseNode.MESSAGES).document(mCurrentUserId).collection(chatUId);
         CollectionReference messagesRefOther = FirebaseFirestore.getInstance().collection(DatabaseNode.MESSAGES).document(chatUId).collection(mCurrentUserId);
         if (chatMessage != null) {
-            messagesRef.add(chatMessage);
-            messagesRefOther.add(chatMessage);
+
             final Map<String, Object> convers = new HashMap<>();
             convers.put("lastMsg",chatMessage.getMessage());
             convers.put("timestamp", chatMessage.getTime_sent());
-            OtherChatReference.collection("conversations").document(mCurrentUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            convers.put("lastMsgStatus", chatMessage.getMessageStatus());
+            convers.put("lastMsgType", chatMessage.getMessageType());
+
+            messagesRef.add(chatMessage);
+            messagesRefOther.add(chatMessage);
+
+            chatReference.collection("conversations").document(chatUId).update(convers);
+            OtherChatReference.collection("conversations").document(mCurrentUserId).update(convers);
+
+            /*OtherChatReference.collection("conversations").document(mCurrentUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     convers.put("count", Integer.valueOf(documentSnapshot.get("count").toString()) + 1);
                 }
-            });
-            convers.put("last_msg_status", chatMessage.getMessageStatus());
-            chatReference.collection("conversations").document(chatUId).update(convers);
-            OtherChatReference.collection("conversations").document(mCurrentUserId).update(convers);
+            });*/
+
+
             //chatReference.collection("conversations").document(chatUId).update("lastMsg",chatMessage.getMessage());
             //OtherChatReference.collection("conversations").document(mCurrentUserId).update("lastMsg",chatMessage.getMessage());
             //chatItemsViewAdapter.notifyDataSetChanged();
@@ -605,7 +912,7 @@ public class ChatActivity extends AppCompatActivity {
             if (cameraIntent.resolveActivity(getApplicationContext().getPackageManager()) != null) {
                 if (mediaFile != null) {
 
-                    startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO);
+                    startActivityForResult(cameraIntent, MediaAction.TAKE_PICTURE);
                 }
             }
         } catch (Exception e) {
@@ -622,7 +929,7 @@ public class ChatActivity extends AppCompatActivity {
         File cacheDirectory = getBaseContext().getCacheDir();
         //  File cacheDir = new File(android.os.Environment.getExternalStorageDirectory(), "Mutual/images/sent");
 
-        File cacheDir = new File(android.os.Environment.getExternalStorageDirectory(), "Mutual/images/sent");
+        File cacheDir = new File(android.os.Environment.getExternalStorageDirectory(), MediaPath.IMAGE_SENT_FOLDER);
 
         if (!cacheDir.exists())
             cacheDir.mkdirs();
@@ -691,6 +998,9 @@ public class ChatActivity extends AppCompatActivity {
             case R.id.action_media:
                 Intent mediaActivity = new Intent(ChatActivity.this,ChatMediaActivity.class);
                 startActivity(mediaActivity);
+                break;
+            case R.id.attach_file_btn:
+
             default:
                 break;
         }
