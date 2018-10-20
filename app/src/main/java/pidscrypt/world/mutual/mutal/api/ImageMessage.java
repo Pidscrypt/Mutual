@@ -15,4 +15,8 @@ public class ImageMessage extends ChatMessage {
         setLocalFile(localFile);
     }
 
+    public void  testMethod(){
+
+    }
+
 }

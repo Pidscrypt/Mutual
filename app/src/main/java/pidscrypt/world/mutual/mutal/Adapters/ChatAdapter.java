@@ -147,10 +147,10 @@ public class ChatAdapter extends FirestoreRecyclerAdapter<Conversation,ChatAdapt
         holder.chat_none_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(mContext, ChatActivity.class);
+                /*Intent intent = new Intent(mContext, ChatActivity.class);
                 intent.putExtra("conversation", (Parcelable) model);
-                mContext.startActivity(intent);
-                /*MutualUser user;
+                mContext.startActivity(intent);*/
+                MutualUser user;
 
                 Intent chat_intent = new Intent(mContext, ChatActivity.class);
                 Bundle b = new Bundle();
@@ -160,7 +160,7 @@ public class ChatAdapter extends FirestoreRecyclerAdapter<Conversation,ChatAdapt
                 b.putString("uid",model.getUid());
                 b.putBoolean("from_contacts",true);
                 chat_intent.putExtra("chat_details",b);
-                mContext.startActivity(chat_intent);*/
+                mContext.startActivity(chat_intent);
             }
         });
 

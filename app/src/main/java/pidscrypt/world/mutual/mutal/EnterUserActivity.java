@@ -34,6 +34,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -53,6 +54,7 @@ import pidscrypt.world.mutual.mutal.api.DatabaseNode;
 import pidscrypt.world.mutual.mutal.api.MessageType;
 import pidscrypt.world.mutual.mutal.api.MutualDateFormat;
 import pidscrypt.world.mutual.mutal.api.UserStatus;
+import pidscrypt.world.mutual.mutal.services.MutualFirebaseIdInstanceService;
 import pidscrypt.world.mutual.mutal.user.MutualUser;
 
 import static java.lang.Thread.sleep;
@@ -125,6 +127,7 @@ public class EnterUserActivity extends AppCompatActivity {
                                 last_seen,
                                 UserStatus.ONLINE
                         );
+                        user.setDevice_token(FirebaseInstanceId.getInstance().getToken());
 
                         userRef.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override

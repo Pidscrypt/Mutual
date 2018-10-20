@@ -16,6 +16,7 @@ public class MutualUser {
             uid;
     private long last_seen;
     private boolean online;
+    private String device_token;
 
     public MutualUser() {
     }
@@ -28,6 +29,14 @@ public class MutualUser {
         this.uid = uid;
         this.last_seen = last_seen;
         this.online = online;
+    }
+
+    public String getDevice_token() {
+        return device_token;
+    }
+
+    public void setDevice_token(String device_token) {
+        this.device_token = device_token;
     }
 
     public String getName() {

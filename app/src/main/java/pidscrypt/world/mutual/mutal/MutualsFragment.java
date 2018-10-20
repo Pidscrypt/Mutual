@@ -97,7 +97,6 @@ public class MutualsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override

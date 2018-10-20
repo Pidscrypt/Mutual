@@ -28,6 +28,10 @@ public class Conversation {
         return withPhone;
     }
 
+    public void setWithPhone(String withPhone) {
+        this.withPhone = withPhone;
+    }
+
     public int getLastMsgType() {
         return lastMsgType;
     }

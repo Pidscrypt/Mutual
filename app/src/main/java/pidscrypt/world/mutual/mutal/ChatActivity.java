@@ -87,6 +87,7 @@ import pidscrypt.world.mutual.mutal.api.ImageMessage;
 import pidscrypt.world.mutual.mutal.api.MediaPath;
 import pidscrypt.world.mutual.mutal.api.MessageType;
 import pidscrypt.world.mutual.mutal.api.MutualDateFormat;
+import pidscrypt.world.mutual.mutal.api.Notification;
 import pidscrypt.world.mutual.mutal.api.TextMessage;
 import pidscrypt.world.mutual.mutal.constants.MediaAction;
 import pidscrypt.world.mutual.mutal.media.Audio;
@@ -171,7 +172,7 @@ public class ChatActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         conversation = bundle.getParcelable("conversation");
 
-        if (conversation != null) {
+        /*if (conversation != null) {
             name_chat.setText(conversation.getWith());
             MutualDateFormat timeAgo = new MutualDateFormat();
             //final String last_seen = timeAgo.getTimeAgo(Long.valueOf(b.getString("last_seen")), getApplicationContext());
@@ -213,22 +214,22 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
 
-            chatPhone = conversation.getPhone();
+            chatPhone = conversation.getWithPhone();
 
 
-            if(!mutualUser.getImage_uri().trim().isEmpty()){
+            if(!conversation.getImg_uri().trim().isEmpty()){
                 RequestOptions requestOptions = new RequestOptions()
                         .placeholder(R.drawable.avatar_contact)
                         .error(R.drawable.bg_outline_gray)
                         .diskCacheStrategy(DiskCacheStrategy.ALL);
-                chatImageUri = mutualUser.getImage_uri();
-                Glide.with(ChatActivity.this).setDefaultRequestOptions(requestOptions).load(mutualUser.getImage_uri()).thumbnail(0.5f).into(user_img);
+                chatImageUri = conversation.getImg_uri();
+                Glide.with(ChatActivity.this).setDefaultRequestOptions(requestOptions).load(chatImageUri).thumbnail(0.5f).into(user_img);
             }else{
                 user_img.setImageResource(R.drawable.avatar_contact);
             }
-        }
+        }*/
 
-        /*if (bundle != null) {
+        if (bundle != null) {
             Bundle b = bundle.getBundle("chat_details");
             name_chat.setText(b.getString("chat_name"));
             MutualDateFormat timeAgo = new MutualDateFormat();
@@ -284,7 +285,7 @@ public class ChatActivity extends AppCompatActivity {
             }else{
                 user_img.setImageResource(R.drawable.avatar_contact);
             }
-        }*/
+        }
 
 
         chatReference.collection("conversations").document(chatUId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -300,10 +301,11 @@ public class ChatActivity extends AppCompatActivity {
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             MutualUser user = documentSnapshot.toObject(MutualUser.class);
                             final Conversation mine = new Conversation(shared.isSeen(), shared.getStart_date(), chatImageUri);
-                            mine.setWith(user.getPhone());
+                            mine.setWith(user.getName());
                             mine.setUid(user.getUId());
                             mine.setLastMsgType(1);
                             mine.setTimestamp(new Date().getTime());
+                            mine.setWithPhone(user.getPhone());
                             chatReference.collection("conversations").document(chatUId).set(mine);
                         }
                     });
@@ -315,10 +317,11 @@ public class ChatActivity extends AppCompatActivity {
                             final Conversation others = new Conversation(shared.isSeen(), shared.getStart_date(), documentSnapshot.getString("image_uri"));
                             //others.setLastMsg("chat set at other");
                             //others.setTimestamp(mine.getTimestamp());
-                            others.setWith(user.getPhone());
+                            others.setWith(user.getName());
                             others.setUid(user.getUId());
                             others.setLastMsgType(1);
                             others.setTimestamp(new Date().getTime());
+                            others.setWithPhone(user.getPhone());
                             OtherChatReference.collection("conversations").document(mCurrentUserId).set(others);
                         }
                     });
@@ -814,7 +817,6 @@ public class ChatActivity extends AppCompatActivity {
 
     private void sendMessage(int messageType, String message, String uriLocal){
         ChatMessage chatMessage;
-
         switch(messageType){
             case MessageType.IMAGE:
                 chatMessage = new ImageMessage(FirebaseAuth.getInstance().getUid(), chatUId,message, uriLocal);
@@ -838,6 +840,7 @@ public class ChatActivity extends AppCompatActivity {
                 chatMessage = null;
                 break;
         }
+
         CollectionReference messagesRef = FirebaseFirestore.getInstance().collection(DatabaseNode.MESSAGES).document(mCurrentUserId).collection(chatUId);
         CollectionReference messagesRefOther = FirebaseFirestore.getInstance().collection(DatabaseNode.MESSAGES).document(chatUId).collection(mCurrentUserId);
         if (chatMessage != null) {
@@ -847,9 +850,15 @@ public class ChatActivity extends AppCompatActivity {
             convers.put("timestamp", chatMessage.getTime_sent());
             convers.put("lastMsgStatus", chatMessage.getMessageStatus());
             convers.put("lastMsgType", chatMessage.getMessageType());
+            final Notification notification = new Notification(mCurrentUserId,chatMessage.getMessage());
 
             messagesRef.add(chatMessage);
-            messagesRefOther.add(chatMessage);
+            messagesRefOther.add(chatMessage).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                @Override
+                public void onSuccess(DocumentReference documentReference) {
+                    FirebaseFirestore.getInstance().collection(DatabaseNode.USERS).document(chatUId).collection("notifications").add(notification);
+                }
+            });
 
             chatReference.collection("conversations").document(chatUId).update(convers);
             OtherChatReference.collection("conversations").document(mCurrentUserId).update(convers);
