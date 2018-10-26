@@ -107,10 +107,10 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
 
         mContacts = new Contacts(getContext());
 
-        ContactsViewAdapter contactsViewAdapter = new ContactsViewAdapter(mContacts,getContext());
+        /*ContactsViewAdapter contactsViewAdapter = new ContactsViewAdapter(mContacts,getContext());
         contacts_recycler.setHasFixedSize(true);
         contacts_recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        contacts_recycler.setAdapter(contactsViewAdapter);
+        contacts_recycler.setAdapter(contactsViewAdapter);*/
 
         /*ContactsViewAdapter contactsViewAdapterNoneMutual = new ContactsViewAdapter(mContacts.fetchNoneMutualContacts(),getContext(), false);
         contacts_recycler_none_mutual.setHasFixedSize(true);

@@ -1,9 +1,17 @@
 package pidscrypt.world.mutual.mutal;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -14,6 +22,7 @@ import android.widget.Spinner;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import pidscrypt.world.mutual.mutal.Database.CountryData;
+import pidscrypt.world.mutual.mutal.services.MutualPermission;
 
 import static java.lang.Thread.sleep;
 
@@ -30,10 +39,10 @@ public class PhoneAuthActivity extends AppCompatActivity {
         actionBar.hide();*/
 
         spinner = findViewById(R.id.spinnerCountries);
-        ArrayAdapter<String> countries = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item, CountryData.countryNames);
+        ArrayAdapter<String> countries = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, CountryData.countryNames);
         //spinner.setSelection(countries.getPosition("Uganda"), true);
         spinner.setAdapter(countries);
-        spinner.setSelection(countries.getPosition("Uganda"),true);
+        spinner.setSelection(countries.getPosition("Uganda"), true);
 
         editTextMobile = (EditText) findViewById(R.id.editTextMobile);
         country_code = (EditText) findViewById(R.id.country_code);
@@ -53,20 +62,34 @@ public class PhoneAuthActivity extends AppCompatActivity {
             }
         });
 
+        MutualPermission mutualPermission = new MutualPermission(PhoneAuthActivity.this, 1);
+        if (!mutualPermission.check(new String[]{Manifest.permission.READ_PHONE_STATE, "Allow Mutual Messenger to access your phone state."})) {
+            mutualPermission.request(Manifest.permission.READ_PHONE_STATE);
+        }
+/*
+        if (!mutualPermission.check(new String[]{Manifest.permission.READ_SMS, "Allow Mutual Messenger to access your incoming messages"})) {
+            mutualPermission.request(Manifest.permission.READ_SMS);
+        }*/
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            editTextMobile.setText(((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE)).getLine1Number());
+        }
+
+
         findViewById(R.id.buttonContinue).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String code = CountryData.countryAreaCodes[spinner.getSelectedItemPosition()];
                 String mobile = editTextMobile.getText().toString().trim();
 
-                if(mobile.isEmpty() || mobile.length() < 9){
+                if (mobile.isEmpty() || mobile.length() < 9) {
                     editTextMobile.setError("Enter a valid mobile");
                     editTextMobile.requestFocus();
                     return;
                 }
 
-                if(mobile.startsWith("0")){
-                    mobile = mobile.substring(1,mobile.length());
+                if (mobile.startsWith("0")) {
+                    mobile = mobile.substring(1, mobile.length());
                 }
 
                 String phoneNumber = "+" + code + mobile;
@@ -78,6 +101,25 @@ public class PhoneAuthActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //@TODO: put my phone number into the telephone box
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+
+            }
+        }
+    }
 
     public void startAnimation(){
         int wait = 0;

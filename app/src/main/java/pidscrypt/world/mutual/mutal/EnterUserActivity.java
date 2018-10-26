@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -128,6 +129,8 @@ public class EnterUserActivity extends AppCompatActivity {
                                 UserStatus.ONLINE
                         );
                         user.setDevice_token(FirebaseInstanceId.getInstance().getToken());
+                        Log.d("device_token", user.getDevice_token());
+                        Log.d("reg_user",  FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
 
                         userRef.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
