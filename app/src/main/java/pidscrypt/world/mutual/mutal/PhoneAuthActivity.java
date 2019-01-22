@@ -72,7 +72,9 @@ public class PhoneAuthActivity extends AppCompatActivity {
         }*/
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            editTextMobile.setText(((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE)).getLine1Number());
+//    @TODO: get phone and put it in the number text box
+//            this line was removed because it causes an error in the auth page
+//            editTextMobile.setText(((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE)).getLine1Number());
         }
 
 

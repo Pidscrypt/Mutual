@@ -61,11 +61,11 @@ public class ContactsViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder chatsViewHolder, int i) {
-            if((getItem(i).isMutual() == 1) || (getItem(i).isMutual() == 2)){
+//            if((getItem(i).isMutual() == 1) || (getItem(i).isMutual() == 2)){
                 configureContactView((ContactsViewHolder) chatsViewHolder, i);
-            } else{
-                configureSeperatorContactView((ContactsSeperatorViewHolder) chatsViewHolder, i);
-            }
+//            } else{
+//                configureSeperatorContactView((ContactsSeperatorViewHolder) chatsViewHolder, i);
+//            }
 
     }
 
@@ -76,16 +76,16 @@ public class ContactsViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private void configureContactView(ContactsViewHolder chatsViewHolder, int i){
         chatsViewHolder.contact_name.setText(contacts_list.get(i).getName());
         chatsViewHolder.contact_tag.setText(contacts_list.get(i).getNumber());
-        chatsViewHolder.contact_img.setImageResource(contacts_list.get(i).getImg());
+//        chatsViewHolder.contact_img.setImageResource(contacts_list.get(i).getImg());
     }
 
     @Override
     public int getItemViewType(int position) {
-        if((getItem(position).isMutual() == 1) || (getItem(position).isMutual() == 2)){
+//        if((getItem(position).isMutual() == 1) || (getItem(position).isMutual() == 2)){
             return CONTACT_VIEW;
-        }else{
-            return CONTACT_SEPERATOR;
-        }
+//        }else{
+//            return CONTACT_SEPERATOR;
+//        }
 
     }
 

@@ -8,7 +8,7 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
-    <string name="default_notification_channel_id" >PIDSCRYPT_CH_01</string>
+    <string name="default_notification_channel_id">PIDSCRYPT_CH_01</string>
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>

@@ -59,11 +59,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "158388477164-fk93t0ol7ro6ldt0cj7t9cvimgnbfabk.apps.googleusercontent.com",
+          "client_id": "158388477164-8ufkgcddjj2cp5d04t1htaj0o8b2p1km.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "pidscrypt.world.mutual.mutal",
-            "certificate_hash": "a83f762656252daf99124467127ba0d3c4f069fb"
+            "certificate_hash": "ec16cf4efe7b171a3c439f288153872e32302596"
           }
         },
         {

@@ -57,6 +57,60 @@ public class Contacts {
         sharedPreferences = this.mContext.getSharedPreferences("contact_data",0);
     }
 
+    private List<Contact> getContacts(){
+        List<String> eraser = new ArrayList<>();
+
+        // cursor get all contacts in the phone
+        Cursor cursor = mContext.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null, null,FROM_COLUMNS[0] + " ASC");
+
+        cursor.moveToFirst();
+
+        while(cursor.moveToNext()){
+            String phone = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            if(phone.startsWith("0")){
+                //@TODO: change this to auto detect country code
+                phone = "+256" + phone.substring(1);
+            }
+            if(phone.contains(" ")){
+                phone = phone.replaceAll(" ","");
+            }
+            if(eraser.contains(phone)){
+                continue;
+            }
+            final Contact cont = new Contact(
+                    cursor.getString(cursor.getColumnIndex(FROM_COLUMNS[0])),
+                    phone);
+
+            //@TODO: check firebase for contact exists
+            contactsRef.document(cont.getNumber()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if(documentSnapshot.exists()){
+//                        cont.setMutual(1);
+                        mutualContacts.add(cont);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(cont.getNumber(),cont.getName());
+                        editor.apply();
+                    }else{
+//                        cont.setMutual(2);
+
+                        noneMutualContacts.add(cont);
+                    }
+                }
+            });
+
+            contactsRef.document(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber()).collection("my_contacts").add(cont);
+
+            eraser.add(phone);
+        }
+        Contact c = new Contact("fake","43789734");
+//        c.setMutual(3);
+        mutualContacts.add(c);
+        mutualContacts.addAll(noneMutualContacts);
+
+        return mutualContacts;
+    }
+
     public List<Contact> fetctContacts(){
 
         mutualContacts = new ArrayList<>();
@@ -83,21 +137,20 @@ public class Contacts {
             }
             final Contact cont = new Contact(
                     cursor.getString(cursor.getColumnIndex(FROM_COLUMNS[0])),
-                    phone,
-                    "");
+                    phone);
 
             //@TODO: check firebase for contact exists
             contactsRef.document(cont.getNumber()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     if(documentSnapshot.exists()){
-                        cont.setMutual(1);
+//                        cont.setMutual(1);
                         mutualContacts.add(cont);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString(cont.getNumber(),cont.getName());
                         editor.apply();
                     }else{
-                        cont.setMutual(2);
+//                        cont.setMutual(2);
 
                         noneMutualContacts.add(cont);
                     }
@@ -108,8 +161,8 @@ public class Contacts {
 
             eraser.add(phone);
         }
-        Contact c = new Contact("fake","43789734", "");
-        c.setMutual(3);
+        Contact c = new Contact("fake","43789734");
+//        c.setMutual(3);
         mutualContacts.add(c);
         mutualContacts.addAll(noneMutualContacts);
 

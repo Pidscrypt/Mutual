@@ -170,7 +170,7 @@ public class ChatActivity extends AppCompatActivity {
         chatReference = db.collection(DatabaseNode.CHATS).document(mCurrentUserId);
 
         Bundle bundle = getIntent().getExtras();
-        conversation = bundle.getParcelable("conversation");
+//        conversation = bundle.getParcelable("conversation");
 
         /*if (conversation != null) {
             name_chat.setText(conversation.getWith());
@@ -856,7 +856,8 @@ public class ChatActivity extends AppCompatActivity {
             messagesRefOther.add(chatMessage).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                 @Override
                 public void onSuccess(DocumentReference documentReference) {
-                    FirebaseFirestore.getInstance().collection(DatabaseNode.USERS).document(chatUId).collection("notifications").add(notification);
+//                    @FIXME: send notification to firestore here... currently throwing exceptions.
+//                    FirebaseFirestore.getInstance().collection(DatabaseNode.USERS).document(chatUId).collection("notifications").add(notification);
                 }
             });
 

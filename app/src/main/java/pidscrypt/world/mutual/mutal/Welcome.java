@@ -64,7 +64,7 @@ public class Welcome extends AppCompatActivity {
         //ActionBar actionBar = getSupportActionBar();
         //actionBar.hide();
 
-        welcome_reveal = (LinearLayout)findViewById(R.id.moving_bg);
+        welcome_reveal = (LinearLayout) findViewById(R.id.moving_bg);
         //btn_continue = (Button) findViewById(R.id.btn_continue);
         logo = findViewById(R.id.logo);
         logo_container = (LinearLayout) findViewById(R.id.logo_container);
